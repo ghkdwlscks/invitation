@@ -894,7 +894,7 @@ dialog.entry-card .guestbook-fields textarea {
 }
 .couple-figures {
   position: absolute;
-  top: 109px;
+  top: 100px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;

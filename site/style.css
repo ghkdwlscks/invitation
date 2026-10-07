@@ -1069,7 +1069,7 @@ html.js .gallery-grid:not(.is-expanded) .is-extra {
   border-bottom: 1px solid #eadfdb;
   background: #fffaf6;
   color: #51484a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--body);
 }
 .iw-close {
   flex: none;

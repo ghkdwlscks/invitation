@@ -1279,46 +1279,59 @@ dialog.entry-card .guestbook-fields textarea {
     visibility: hidden;
   }
 }
-/* 착석한 뒤 머리글 아래의 버튼 세 개: 같은 모양, 기능마다 색과 아이콘으로 구분 */
-.garden-heading {
-  flex-wrap: wrap;
+.venue-row {
+  display: flex;
 }
-.garden-actions {
+.venue-row .venue {
+  flex: 1;
+  min-width: 0;
+}
+/* 착석한 뒤 예식장 오른쪽 탭: 청첩장의 미니홈피 카드 탭과 같은 모양 */
+.hall-tabs {
   display: grid;
-  flex: 1 0 100%;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  flex: none;
+  align-content: start;
+  gap: 5px;
+  width: 30px;
+  padding: 10px 0 0;
+  background: #fff;
 }
-.garden-actions button {
+.hall-tabs button {
+  display: block;
+  padding: 11px 0;
+  border: 1px solid #e3d3d1;
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  background: #f6eeeb;
+  color: #9a8286;
+  font: 700 11px/1 var(--font);
+  letter-spacing: 0.1em;
+  text-align: center;
+  writing-mode: vertical-rl;
+  cursor: pointer;
+}
+.hall-tabs button:hover,
+.hall-tabs button:active {
+  border-color: #c99aa4;
+  background: #d9a8b2;
+  color: #fff;
+}
+.seated-controls #home-button {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 4px;
-  min-height: 34px;
-  padding: 6px 4px;
+  flex: none;
+  padding: 6px 10px;
   border: 2px solid #fff;
-  border-radius: 8px;
+  border-radius: 999px;
   background: #e99c86;
-  color: #fff;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  white-space: nowrap;
   box-shadow: 2px 3px 0 #cf8371;
+  color: #fff;
+  font: 800 10.5px/1 var(--font);
+  pointer-events: auto;
+  cursor: pointer;
 }
-.garden-actions button span {
-  font-size: 12px;
-  line-height: 1;
-}
-.garden-actions #honeymoon-button {
-  background: #7fadbb;
-  box-shadow: 2px 3px 0 #63909f;
-}
-.garden-actions #restyle-button {
-  background: #d796aa;
-  box-shadow: 2px 3px 0 #b97b8f;
-}
-.garden-actions button:active {
+.seated-controls #home-button:active {
   transform: translateY(1px);
   box-shadow: 1px 1px 0 #0002;
 }

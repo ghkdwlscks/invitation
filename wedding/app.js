@@ -372,7 +372,7 @@
     venue.classList.toggle('is-seated', Boolean(guest.seat));
     $('#game-controls').hidden = Boolean(guest.seat);
     $('#seated-controls').hidden = !guest.seat;
-    $('#garden-actions').hidden = !guest.seat;
+    $('#hall-tabs').hidden = !guest.seat;
     guestbookBoard.hidden = !guest.seat;
     status.hidden = Boolean(guest.seat);
     setPlayerAvatar();
@@ -732,6 +732,13 @@
     if (seat) centerCameraOn(seat);
   });
   $('#honeymoon-button').addEventListener('click', () => window.HONEYMOON_GAME.open(guest));
+  // 오른쪽 탭: 청첩장으로 돌아가기, 방명록으로 내려가기
+  $('#invitation-tab').addEventListener('click', () => {
+    const close = window.parent !== window && window.parent.document.querySelector('[data-close-layer]');
+    if (close) close.click();
+    else location.href = '../';
+  });
+  $('#guestbook-tab').addEventListener('click', () => guestbookBoard.scrollIntoView({behavior: 'smooth', block: 'start'}));
   $('#mini-game-button').addEventListener('click', () => {
     launchGameAfterResult = true;
     window.WEDDING_BACK.back();

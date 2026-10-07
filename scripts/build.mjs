@@ -1,5 +1,5 @@
 // 청첩장을 GitHub Pages에 올릴 dist/ 폴더로 만든다.
-import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
@@ -58,6 +58,19 @@ async function buildFourcut() {
   }
 }
 
+// 사진 속 EXIF에 촬영 위치(GPS) 정보가 들어 있는지 본다
+function hasGps(exif) {
+  if (!exif) return false;
+  const start = exif.toString('ascii', 0, 4) === 'Exif' ? 6 : 0;
+  const tiff = exif.subarray(start);
+  const little = tiff.toString('ascii', 0, 2) === 'II';
+  const u16 = offset => (little ? tiff.readUInt16LE(offset) : tiff.readUInt16BE(offset));
+  const u32 = offset => (little ? tiff.readUInt32LE(offset) : tiff.readUInt32BE(offset));
+  const ifd = u32(4);
+  for (let i = 0; i < u16(ifd); i++) if (u16(ifd + 2 + i * 12) === 0x8825) return true;
+  return false;
+}
+
 async function buildGallery() {
   const source = path.join(PHOTOS, 'gallery');
   let files = (await imagesIn(source)).map(name => path.join(source, name));
@@ -68,6 +81,7 @@ async function buildGallery() {
     warnings.push('갤러리에 샘플 사진(sample-*)이 들어 있습니다. 실제 사진으로 바꿔 주세요.');
   }
   await mkdir(path.join(DIST, 'photos', 'gallery', 'thumb'), { recursive: true });
+  await mkdir(path.join(DIST, 'photos', 'gallery', 'view'), { recursive: true });
   await mkdir(path.join(DIST, 'photos', 'gallery', 'full'), { recursive: true });
   const items = [];
   for (const [index, file] of files.entries()) {
@@ -78,13 +92,20 @@ async function buildGallery() {
       .resize({ width: 800, height: 800, fit: 'cover', position: sharp.strategy.attention })
       .webp({ quality: 85 })
       .toFile(path.join(DIST, 'photos', 'gallery', 'thumb', name));
-    // 크게 보기는 원본 크기 그대로, 눈으로 구분되지 않는 최고 화질로. 사진 속 촬영 위치 같은 정보는 지운다
-    const isPng = path.extname(file).toLowerCase() === '.png';
-    const fullName = `${number}.${isPng ? 'png' : 'jpg'}`;
-    await (isPng ? image.clone().png() : image.clone().jpeg({ quality: 98, chromaSubsampling: '4:4:4' }))
-      .toFile(path.join(DIST, 'photos', 'gallery', 'full', fullName));
+    // 크게 보기: 먼저 빨리 뜨는 사진을 보여주고, 원본을 다 받으면 원본으로 바꾼다
+    await image.clone()
+      .resize({ width: 1800, height: 1800, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 84 })
+      .toFile(path.join(DIST, 'photos', 'gallery', 'view', name));
+    // 원본은 파일 그대로 올린다. 촬영 위치가 들어 있거나 브라우저가 못 여는 형식일 때만 최고 화질로 다시 저장한다
+    const extension = path.extname(file).toLowerCase();
+    const metadata = await sharp(file).metadata();
+    const asIs = ['.jpg', '.jpeg', '.png', '.webp'].includes(extension) && !hasGps(metadata.exif);
+    const fullName = `${number}${asIs ? extension : '.jpg'}`;
+    if (asIs) await copyFile(file, path.join(DIST, 'photos', 'gallery', 'full', fullName));
+    else await image.clone().jpeg({ quality: 98, chromaSubsampling: '4:4:4' }).toFile(path.join(DIST, 'photos', 'gallery', 'full', fullName));
     const extra = index >= GALLERY_PREVIEW_COUNT ? ' class="is-extra"' : '';
-    items.push(`<li${extra}><button type="button" class="gallery-item" data-full="photos/gallery/full/${fullName}" aria-label="사진 ${index + 1} 크게 보기">`
+    items.push(`<li${extra}><button type="button" class="gallery-item" data-view="photos/gallery/view/${name}" data-full="photos/gallery/full/${fullName}" aria-label="사진 ${index + 1} 크게 보기">`
       + `<img src="photos/gallery/thumb/${name}" alt="" width="800" height="800" loading="lazy" decoding="async"></button></li>`);
   }
   return items.join('\n        ');

@@ -325,10 +325,13 @@
     }
     showBgmState();
   });
-  document.addEventListener('pointerdown', event => {
-    if (bgmStarted || event.target.closest('#bgmToggle, [data-open-wedding]')) return;
-    playBgm();
-  });
+  // 브라우저는 손님이 화면을 누른 뒤에야 소리를 허락한다. 휴대폰 터치는 손을 뗄 때 허락되므로 그때도 다시 시도한다
+  for (const type of ['pointerdown', 'pointerup', 'touchend', 'keydown']) {
+    document.addEventListener(type, event => {
+      if (bgmStarted || !bgm.paused || !shutter.paused || event.target.closest?.('#bgmToggle, [data-open-wedding]')) return;
+      playBgm();
+    });
+  }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { shutter.pause(); bgm.pause(); }
     else resumeBgm();

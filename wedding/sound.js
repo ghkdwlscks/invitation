@@ -49,8 +49,10 @@
       if (name !== current || muted || suspended) audio.pause();
     }
     if (current && !muted && !suspended) {
-      // 브라우저가 막으면 다음 터치 때 다시 시도한다
-      player(current).play().catch(() => document.addEventListener('pointerdown', refresh, {once: true}));
+      // 브라우저가 막으면 다음 터치 때 다시 시도한다(휴대폰 터치는 손을 뗄 때 소리가 허락된다)
+      player(current).play().catch(() => {
+        for (const type of ['pointerup', 'touchend', 'keydown']) document.addEventListener(type, refresh, {once: true});
+      });
     }
     buttons.forEach(button => {
       button.setAttribute('aria-pressed', String(!muted));

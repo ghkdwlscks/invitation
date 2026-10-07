@@ -257,9 +257,10 @@
   const writeMuted = value => { try { localStorage.setItem(MUTE_KEY, value ? '1' : '0'); } catch (_) { /* 이번 방문 동안만 기억한다. */ } };
   const inWedding = () => layers.some(layer => layer.element === weddingOverlay);
 
+  // 아이콘은 지금 소리가 나는지가 아니라 소리 설정(켬/끔)을 보여준다. 찰칵 소리가 나거나 첫 터치를 기다리는 동안에도 켜진 모양
   function showBgmState() {
     const on = !readMuted();
-    bgmToggle.setAttribute('aria-pressed', String(on && !bgm.paused));
+    bgmToggle.setAttribute('aria-pressed', String(on));
     bgmToggle.setAttribute('aria-label', on ? '배경음악 끄기' : '배경음악 켜기');
   }
 

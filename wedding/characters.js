@@ -170,7 +170,7 @@
 
   function drawHairFront(c, hair, color, light, dark, line) {
     // 정수리는 머리 위쪽을 모두 덮는다
-    const top = hair === 'long' || hair === 'updo' ? 10 : hair === 'side' ? 9 : 12;
+    const top = {long: 10, updo: 10, side: 9, comma: 11}[hair] || 12;
     c.rows(HEAD.filter(([y]) => y <= top), color);
     if (hair === 'neat') {
       c.rows([[3, 12, 13], [3, 17, 18], [13, 6, 8], [13, 11, 12], [13, 16, 17], [13, 21, 25], ...range(14, 17, 6, 6), ...range(14, 17, 25, 25)], color);
@@ -178,6 +178,10 @@
     if (hair === 'side') {
       // 가르마: 이마 오른쪽이 드러나고 앞머리가 왼쪽으로 넘어간다
       c.rows([[3, 13, 19], [2, 15, 18], [10, 6, 8], [10, 12, 25], [11, 6, 7], [11, 15, 25], [12, 6, 6], [12, 18, 25], [13, 21, 25], [14, 23, 25], ...range(13, 17, 6, 6), ...range(15, 17, 25, 25)], color);
+    }
+    if (hair === 'comma') {
+      // 신랑 쉼표머리: 내린 앞머리 끝이 한쪽으로 말린다
+      c.rows([[12, 6, 25], [13, 6, 8], [13, 11, 14], [13, 17, 21], [14, 20, 22], [13, 24, 25], ...range(14, 17, 6, 6), ...range(14, 17, 25, 25), [3, 12, 18]], color);
     }
     if (hair === 'bob' || hair === 'pony') {
       c.rows([[13, 6, 8], [13, 10, 14], [13, 17, 21], [13, 23, 25]], color);
@@ -222,7 +226,7 @@
 
   function render(value = {}, formal = '') {
     const avatar = normalize(value);
-    const hair = formal === 'groom' ? 'side' : formal === 'bride' ? 'updo' : avatar.hair;
+    const hair = formal === 'groom' ? 'comma' : formal === 'bride' ? 'updo' : avatar.hair;
     const hairColor = formal === 'groom' ? '#2c2a30' : formal === 'bride' ? '#3d2c2a' : pick(colors.hair, avatar.hairColor, defaults.hairColor).hex;
     const skin = pick(skins, avatar.skin, defaults.skin).hex;
     const skinLine = mix(skin, '#6e2c14', .72);

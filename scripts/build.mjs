@@ -1,5 +1,6 @@
 // 청첩장을 GitHub Pages에 올릴 dist/ 폴더로 만든다.
 import { copyFile, cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import sharp from 'sharp';
 
@@ -118,10 +119,13 @@ async function buildShareImage() {
     file = await findPhoto(path.join(PHOTOS, 'fourcut'), 'winter');
   }
   await mkdir(path.join(DIST, 'images'), { recursive: true });
-  await sharp(file).rotate()
+  const image = await sharp(file).rotate()
     .resize({ width: 1200, height: 630, fit: 'cover', position: sharp.strategy.attention })
     .jpeg({ quality: 85, mozjpeg: true })
-    .toFile(path.join(DIST, 'images', 'og-wedding.jpg'));
+    .toBuffer();
+  await writeFile(path.join(DIST, 'images', 'og-wedding.jpg'), image);
+  // 사진이 바뀌면 주소도 바뀌게 해서 카카오톡이 예전 미리보기를 붙들고 있지 않게 한다
+  return `og-wedding.jpg?v=${createHash('sha1').update(image).digest('hex').slice(0, 8)}`;
 }
 
 function findPlaceholders(html) {
@@ -161,7 +165,7 @@ await cp(path.join(ROOT, 'wedding'), path.join(DIST, 'wedding'), { recursive: tr
 
 await buildFourcut();
 const galleryMarkup = await buildGallery();
-await buildShareImage();
+const shareImage = await buildShareImage();
 
 let html = await readFile(path.join(ROOT, 'site', 'index.html'), 'utf8');
 for (const [marker, markup] of [['<!-- @gallery -->', galleryMarkup], ['<!-- @calendar -->', calendarMarkup(WEDDING_DATE)]]) {
@@ -169,7 +173,7 @@ for (const [marker, markup] of [['<!-- @gallery -->', galleryMarkup], ['<!-- @ca
   html = html.replace(marker, markup);
 }
 // 카카오톡 미리보기는 전체 주소가 있어야 사진을 불러온다
-for (const [attribute, value] of [['property="og:url" content=""', SITE_URL], ['property="og:image" content="images/', `${SITE_URL}images/`]]) {
+for (const [attribute, value] of [['property="og:url" content=""', SITE_URL], ['property="og:image" content="images/og-wedding.jpg', `${SITE_URL}images/${shareImage}`]]) {
   if (!html.includes(attribute)) throw new Error(`site/index.html에 ${attribute} 자리가 없습니다.`);
   html = html.replace(attribute, attribute.replace(/content="[^"]*/, `content="${value}`));
 }

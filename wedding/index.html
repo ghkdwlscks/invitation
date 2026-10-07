@@ -210,63 +210,61 @@
             <p class="garden-note">미니미가 앉는 온라인 자리예요.</p>
           </div>
         </div>
-        <div class="venue-row">
-          <div class="venue" id="venue" aria-label="96석이 있는 온라인 예식장">
-            <div class="venue-world" id="venue-world">
-              <img class="venue-art" src="../assets/mini-wedding-hall.svg" alt="" width="720" height="1140" />
-              <button class="ceremony-couple" id="couple-greeting" type="button" aria-label="신랑 신부의 인사 듣기">
-                <span class="couple-bubble" id="couple-message">저희의 결혼에 참석해주셔서 감사합니다 ♡</span>
-                <span class="couple-figures" aria-hidden="true">
-                  <span id="groom-character"></span>
-                  <span id="bride-character"></span>
-                </span>
-                <span class="couple-label">진찬 ♥ 가현</span>
-              </button>
-              <div class="seat-layer" id="seat-layer"></div>
-              <div class="player" id="player" aria-hidden="true"></div>
-              <div class="speech-bubble" id="speech-bubble" hidden>
-                <strong id="bubble-name"></strong>
-                <p id="bubble-message"></p>
-              </div>
+        <div class="venue" id="venue" aria-label="96석이 있는 온라인 예식장">
+          <div class="venue-world" id="venue-world">
+            <img class="venue-art" src="../assets/mini-wedding-hall.svg" alt="" width="720" height="1140" />
+            <button class="ceremony-couple" id="couple-greeting" type="button" aria-label="신랑 신부의 인사 듣기">
+              <span class="couple-bubble" id="couple-message">저희의 결혼에 참석해주셔서 감사합니다 ♡</span>
+              <span class="couple-figures" aria-hidden="true">
+                <span id="groom-character"></span>
+                <span id="bride-character"></span>
+              </span>
+              <span class="couple-label">진찬 ♥ 가현</span>
+            </button>
+            <div class="seat-layer" id="seat-layer"></div>
+            <div class="player" id="player" aria-hidden="true"></div>
+            <div class="speech-bubble" id="speech-bubble" hidden>
+              <strong id="bubble-name"></strong>
+              <p id="bubble-message"></p>
             </div>
-            <div class="venue-shade" id="venue-shade">
-              <span>♡</span>
-              <p>미니미와 방명록을 먼저 완성해 주세요</p>
-            </div>
-            <div class="game-hud" id="game-hud" hidden>
-              <div class="status-pill" id="status-pill" role="status">빈자리를 누른 뒤 도착하면 앉기 버튼을 눌러 주세요.</div>
-              <div class="game-controls" id="game-controls">
-                <div class="joystick" id="joystick" role="img" aria-label="캐릭터 이동 조이스틱">
-                  <span class="joystick-cross" aria-hidden="true">✦</span>
-                  <span class="joystick-thumb" id="joystick-thumb"></span>
-                </div>
-                <button class="sit-button" id="sit-button" type="button" disabled>
-                  <span class="sit-icon" aria-hidden="true">♡</span>
-                  <span class="sit-label" id="sit-label">착석하기</span>
-                </button>
-              </div>
-              <div class="seated-controls" id="seated-controls" hidden>
-                <span>화면을 밀어 주변 둘러보기</span>
-                <button id="home-button" type="button"><span aria-hidden="true">♥</span>내 자리로</button>
-              </div>
-            </div>
-            <div class="seat-checking" id="seat-checking" role="status" hidden>
-              <span class="seat-checking-heart" aria-hidden="true">♥</span>
-              <p>
-                두근두근
-                <br />
-                <b>당첨 확인 중…</b>
-              </p>
-            </div>
-            <noscript><p class="noscript">예식장을 체험하려면 JavaScript를 켜주세요.</p></noscript>
           </div>
-          <nav class="hall-tabs" id="hall-tabs" aria-label="바로 가기" hidden>
-            <button id="invitation-tab" type="button">청첩장</button>
-            <button id="honeymoon-button" type="button">신혼여행 게임</button>
-            <button id="restyle-button" type="button">내 미니미 꾸미기</button>
-            <button id="guestbook-tab" type="button">방명록</button>
-          </nav>
+          <div class="venue-shade" id="venue-shade">
+            <span>♡</span>
+            <p>미니미와 방명록을 먼저 완성해 주세요</p>
+          </div>
+          <div class="game-hud" id="game-hud" hidden>
+            <div class="status-pill" id="status-pill" role="status">빈자리를 누른 뒤 도착하면 앉기 버튼을 눌러 주세요.</div>
+            <div class="game-controls" id="game-controls">
+              <div class="joystick" id="joystick" role="img" aria-label="캐릭터 이동 조이스틱">
+                <span class="joystick-cross" aria-hidden="true">✦</span>
+                <span class="joystick-thumb" id="joystick-thumb"></span>
+              </div>
+              <button class="sit-button" id="sit-button" type="button" disabled>
+                <span class="sit-icon" aria-hidden="true">♡</span>
+                <span class="sit-label" id="sit-label">착석하기</span>
+              </button>
+            </div>
+            <div class="seated-controls" id="seated-controls" hidden>
+              <span>화면을 밀어 주변 둘러보기</span>
+              <button id="home-button" type="button"><span aria-hidden="true">♥</span>내 자리로</button>
+            </div>
+          </div>
+          <div class="seat-checking" id="seat-checking" role="status" hidden>
+            <span class="seat-checking-heart" aria-hidden="true">♥</span>
+            <p>
+              두근두근
+              <br />
+              <b>당첨 확인 중…</b>
+            </p>
+          </div>
+          <noscript><p class="noscript">예식장을 체험하려면 JavaScript를 켜주세요.</p></noscript>
         </div>
+        <nav class="hall-tabs" id="hall-tabs" aria-label="바로 가기" hidden>
+          <button id="invitation-tab" type="button">청첩장</button>
+          <button id="honeymoon-button" type="button">신혼여행 게임</button>
+          <button id="restyle-button" type="button">내 미니미 꾸미기</button>
+          <button id="guestbook-tab" type="button">방명록</button>
+        </nav>
       </section>
       <section class="guestbook-board mini-window" id="guestbook-board" aria-labelledby="guestbook-board-title" hidden>
         <div class="section-titlebar">

@@ -373,6 +373,7 @@
     $('#game-controls').hidden = Boolean(guest.seat);
     $('#seated-controls').hidden = !guest.seat;
     $('#hall-tabs').hidden = !guest.seat;
+    document.body.classList.toggle('has-hall-tabs', Boolean(guest.seat));
     guestbookBoard.hidden = !guest.seat;
     status.hidden = Boolean(guest.seat);
     setPlayerAvatar();

@@ -1279,31 +1279,39 @@ dialog.entry-card .guestbook-fields textarea {
     visibility: hidden;
   }
 }
-.venue-row {
-  display: flex;
+/* 착석한 뒤 예식장 카드 오른쪽 밖으로 튀어나온 미니홈피 탭(싸이월드처럼). 휴대폰에 맞게 글자는 세로로 */
+.garden-card {
+  position: relative;
+  overflow: visible;
 }
-.venue-row .venue {
-  flex: 1;
-  min-width: 0;
+.garden-card > .section-titlebar {
+  border-radius: 10px 10px 0 0;
 }
-/* 착석한 뒤 예식장 오른쪽 탭: 청첩장의 미니홈피 카드 탭과 같은 모양 */
+.garden-card .venue {
+  border-radius: 0 0 10px 10px;
+}
+.has-hall-tabs .garden-card,
+.has-hall-tabs .guestbook-board {
+  margin-right: 14px;
+}
 .hall-tabs {
+  position: absolute;
+  z-index: 6;
+  top: 44px;
+  left: 100%;
   display: grid;
-  flex: none;
-  align-content: start;
-  gap: 5px;
-  width: 30px;
-  padding: 10px 0 0;
-  background: #fff;
+  gap: 4px;
+  width: 26px;
 }
 .hall-tabs button {
   display: block;
-  padding: 11px 0;
-  border: 1px solid #e3d3d1;
-  border-right: 0;
-  border-radius: 6px 0 0 6px;
-  background: #f6eeeb;
-  color: #9a8286;
+  padding: 10px 0;
+  border: 1px solid #3f81a5;
+  border-left: 0;
+  border-radius: 0 6px 6px 0;
+  background: #579dc3;
+  box-shadow: 2px 2px 0 #dcecf1;
+  color: #fff;
   font: 700 11px/1 var(--font);
   letter-spacing: 0.1em;
   text-align: center;
@@ -1312,9 +1320,8 @@ dialog.entry-card .guestbook-fields textarea {
 }
 .hall-tabs button:hover,
 .hall-tabs button:active {
-  border-color: #c99aa4;
-  background: #d9a8b2;
-  color: #fff;
+  background: #fff;
+  color: #3f81a5;
 }
 .seated-controls #home-button {
   display: flex;

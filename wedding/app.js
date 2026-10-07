@@ -120,7 +120,7 @@
       button.setAttribute('aria-pressed', String(avatarDraft.accessory === item.id));
       // 지금 꾸미는 미니미가 그 액세서리를 한 모습을 잘라서 보여준다
       const icon = item.view
-        ? MINIMI.render({...avatarDraft, accessory: item.id}).replace('viewBox="0 0 32 44"', `viewBox="${item.view}"`)
+        ? MINIMI.render({...avatarDraft, accessory: item.id}).replace(/viewBox="[^"]*"/, `viewBox="${item.view}"`)
         : '−';
       button.innerHTML = `<i aria-hidden="true">${icon}</i><span></span>`;
       button.querySelector('span').textContent = item.label;

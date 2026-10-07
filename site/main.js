@@ -165,7 +165,7 @@
   function buildViewer() {
     if (viewerTrack.childElementCount) return;
     viewerTrack.innerHTML = galleryItems.map((item, index) =>
-      `<div class="viewer-slide"><img data-src="${item.dataset.view}" data-full="${item.dataset.full}" alt="사진 ${index + 1}" decoding="async"></div>`).join('');
+      `<div class="viewer-slide"><img data-src="${item.dataset.full}" alt="사진 ${index + 1}" decoding="async"></div>`).join('');
   }
 
   function loadAround(index) {
@@ -175,25 +175,10 @@
     });
   }
 
-  // 보고 있는 사진은 원본을 받아 두었다가 다 받으면 원본으로 바꾼다
-  function loadOriginal(index) {
-    const image = viewerTrack.children[index] && viewerTrack.children[index].firstElementChild;
-    if (!image || image.dataset.original) return;
-    image.dataset.original = 'loading';
-    const original = new Image();
-    original.onload = () => {
-      image.src = original.src;
-      image.dataset.original = 'done';
-    };
-    original.onerror = () => { delete image.dataset.original; };
-    original.src = image.dataset.full;
-  }
-
   function showViewerIndex(index) {
     viewerIndex = Math.max(0, Math.min(galleryItems.length - 1, index));
     viewerCount.textContent = `${viewerIndex + 1} / ${galleryItems.length}`;
     loadAround(viewerIndex);
-    loadOriginal(viewerIndex);
   }
 
   function scrollViewerTo(index, behavior) {

@@ -1,5 +1,5 @@
 // 청첩장을 GitHub Pages에 올릴 dist/ 폴더로 만든다.
-import { copyFile, cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -51,25 +51,12 @@ async function buildFourcut() {
   for (const season of SEASONS) {
     const file = await findPhoto(source, season);
     if (!file) throw new Error(`첫 화면 사진이 없습니다: assets/photos/fourcut/${season}.jpg (또는 .webp, .png)`);
-    // 화면보다 넉넉한 크기(선명한 휴대폰 화면의 1.7배쯤)로 만들어 첫 화면은 빨리 뜨고 깨지지 않게 한다
+    // 휴대폰에 맞는 크기: 가장 선명한 휴대폰 화면(3배)에서도 깨지지 않을 만큼
     await sharp(file).rotate()
-      .resize({ width: 990, height: 1320, fit: 'cover', position: sharp.strategy.attention })
-      .webp({ quality: 90 })
+      .resize({ width: 720, height: 960, fit: 'cover', position: sharp.strategy.attention })
+      .webp({ quality: 85 })
       .toFile(path.join(DIST, 'photos', 'fourcut', `${season}.webp`));
   }
-}
-
-// 사진 속 EXIF에 촬영 위치(GPS) 정보가 들어 있는지 본다
-function hasGps(exif) {
-  if (!exif) return false;
-  const start = exif.toString('ascii', 0, 4) === 'Exif' ? 6 : 0;
-  const tiff = exif.subarray(start);
-  const little = tiff.toString('ascii', 0, 2) === 'II';
-  const u16 = offset => (little ? tiff.readUInt16LE(offset) : tiff.readUInt16BE(offset));
-  const u32 = offset => (little ? tiff.readUInt32LE(offset) : tiff.readUInt32BE(offset));
-  const ifd = u32(4);
-  for (let i = 0; i < u16(ifd); i++) if (u16(ifd + 2 + i * 12) === 0x8825) return true;
-  return false;
 }
 
 async function buildGallery() {
@@ -82,32 +69,23 @@ async function buildGallery() {
     warnings.push('갤러리에 샘플 사진(sample-*)이 들어 있습니다. 실제 사진으로 바꿔 주세요.');
   }
   await mkdir(path.join(DIST, 'photos', 'gallery', 'thumb'), { recursive: true });
-  await mkdir(path.join(DIST, 'photos', 'gallery', 'view'), { recursive: true });
   await mkdir(path.join(DIST, 'photos', 'gallery', 'full'), { recursive: true });
   const items = [];
   for (const [index, file] of files.entries()) {
-    const number = String(index + 1).padStart(2, '0');
-    const name = `${number}.webp`;
+    const name = `${String(index + 1).padStart(2, '0')}.webp`;
     const image = sharp(file).rotate();
     await image.clone()
-      .resize({ width: 800, height: 800, fit: 'cover', position: sharp.strategy.attention })
-      .webp({ quality: 85 })
+      .resize({ width: 480, height: 480, fit: 'cover', position: sharp.strategy.attention })
+      .webp({ quality: 82 })
       .toFile(path.join(DIST, 'photos', 'gallery', 'thumb', name));
-    // 크게 보기: 먼저 빨리 뜨는 사진을 보여주고, 원본을 다 받으면 원본으로 바꾼다
+    // 크게 보기도 휴대폰 화면에 맞는 크기(긴 쪽 2000)로
     await image.clone()
-      .resize({ width: 1800, height: 1800, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 84 })
-      .toFile(path.join(DIST, 'photos', 'gallery', 'view', name));
-    // 원본은 파일 그대로 올린다. 촬영 위치가 들어 있거나 브라우저가 못 여는 형식일 때만 최고 화질로 다시 저장한다
-    const extension = path.extname(file).toLowerCase();
-    const metadata = await sharp(file).metadata();
-    const asIs = ['.jpg', '.jpeg', '.png', '.webp'].includes(extension) && !hasGps(metadata.exif);
-    const fullName = `${number}${asIs ? extension : '.jpg'}`;
-    if (asIs) await copyFile(file, path.join(DIST, 'photos', 'gallery', 'full', fullName));
-    else await image.clone().jpeg({ quality: 98, chromaSubsampling: '4:4:4' }).toFile(path.join(DIST, 'photos', 'gallery', 'full', fullName));
+      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toFile(path.join(DIST, 'photos', 'gallery', 'full', name));
     const extra = index >= GALLERY_PREVIEW_COUNT ? ' class="is-extra"' : '';
-    items.push(`<li${extra}><button type="button" class="gallery-item" data-view="photos/gallery/view/${name}" data-full="photos/gallery/full/${fullName}" aria-label="사진 ${index + 1} 크게 보기">`
-      + `<img src="photos/gallery/thumb/${name}" alt="" width="800" height="800" loading="lazy" decoding="async"></button></li>`);
+    items.push(`<li${extra}><button type="button" class="gallery-item" data-full="photos/gallery/full/${name}" aria-label="사진 ${index + 1} 크게 보기">`
+      + `<img src="photos/gallery/thumb/${name}" alt="" width="480" height="480" loading="lazy" decoding="async"></button></li>`);
   }
   return items.join('\n        ');
 }

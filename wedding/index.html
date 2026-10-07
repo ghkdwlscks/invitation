@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#cbe4ed" />
+    <meta name="description" content="미니미를 꾸미고 방명록을 남겨 우리의 온라인 결혼식에 함께해 주세요." />
+    <title>진찬 ♥ 가현의 온라인 결혼식</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="characters.js" defer></script>
+    <script src="back.js" defer></script>
+    <script src="sound.js" defer></script>
+    <script src="store.js" defer></script>
+    <script src="app.js" defer></script>
+    <script src="game-art.js" defer></script>
+    <script src="minigames.js" defer></script>
+  </head>
+  <body>
+    <main class="invitation" id="top">
+      <header class="page-header">
+        <div class="window-bar">
+          <span class="window-controls" aria-hidden="true">
+            <i></i>
+            <i></i>
+            <i></i>
+          </span>
+          <span>our little wedding.exe</span>
+          <span class="window-heart" aria-hidden="true">♥</span>
+        </div>
+        <div class="page-header-main">
+          <a class="wordmark" href="#top">
+            진찬 ♥ 가현의 결혼식
+            <span>♡</span>
+          </a>
+          <span class="header-note">
+            TODAY
+            <b>01</b>
+            <span>|</span>
+            TOTAL
+            <b>096</b>
+          </span>
+          <button class="sound-toggle" type="button" data-sound-toggle aria-pressed="true" aria-label="배경음악 끄기">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path class="sound-note" d="M9 17V6l10-2v11" />
+              <circle class="sound-note" cx="6.5" cy="17" r="2.5" />
+              <circle class="sound-note" cx="16.5" cy="15" r="2.5" />
+              <path class="sound-off" d="M4 4l16 16" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <dialog class="entry-card mini-window" id="entry-card" aria-labelledby="entry-title">
+        <button class="dialog-close restyle-only" id="restyle-close" type="button" aria-label="옷 갈아입기 닫기">×</button>
+        <div class="section-titlebar">
+          <span class="section-icon">✦</span>
+          <span>MINIMI DRESS UP</span>
+          <span class="titlebar-end">01 / 02</span>
+        </div>
+        <div class="entry-content">
+          <div class="entry-heading"><h2 id="entry-title" tabindex="-1">미니미 꾸미고 입장하기</h2></div>
+          <form id="guest-form">
+            <p class="gift-strip">
+              <span class="gift-strip-icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32" shape-rendering="crispEdges">
+                  <rect x="6" y="15" width="20" height="14" fill="#a9677d" />
+                  <rect x="7" y="16" width="18" height="12" fill="#fff9f2" />
+                  <rect x="14" y="16" width="4" height="12" fill="#d98ca5" />
+                  <rect x="4" y="11" width="24" height="6" fill="#a9677d" />
+                  <rect x="5" y="12" width="22" height="4" fill="#f7d4df" />
+                  <rect x="14" y="12" width="4" height="4" fill="#d98ca5" />
+                  <rect x="7" y="6" width="7" height="6" fill="#a9677d" />
+                  <rect x="8" y="7" width="5" height="4" fill="#f7d4df" />
+                  <rect x="18" y="6" width="7" height="6" fill="#a9677d" />
+                  <rect x="19" y="7" width="5" height="4" fill="#f7d4df" />
+                  <rect x="14" y="9" width="4" height="4" fill="#d98ca5" />
+                </svg>
+              </span>
+              <span>
+                <b>방명록 남기고 착석하면</b>
+                선물 당첨 기회!
+              </span>
+            </p>
+            <div class="miniroom-preview" aria-label="선택한 캐릭터 미리보기">
+              <div class="miniroom-wall">
+                <span class="preview-sticker" aria-hidden="true">♥</span>
+                <div class="avatar-preview" id="avatar-preview"></div>
+                <span class="preview-star" aria-hidden="true">✧</span>
+              </div>
+              <div class="miniroom-floor"></div>
+              <div class="preview-caption">
+                <span>MY MINIMI</span>
+                <strong id="style-summary"></strong>
+              </div>
+            </div>
+            <div class="quick-style">
+              <div>
+                <strong>미니미 랜덤으로 꾸미기</strong>
+                <span>누를 때마다 새로 꾸며져요</span>
+              </div>
+              <div class="quick-style-actions">
+                <button type="button" data-random-style="short">남자 랜덤</button>
+                <button type="button" data-random-style="long">여자 랜덤</button>
+              </div>
+            </div>
+            <details class="manual-style" id="manual-style">
+              <summary>
+                <strong>직접 자세히 꾸미기</strong>
+                <span>헤어 · 옷 · 액세서리</span>
+              </summary>
+              <div class="manual-style-options">
+                <fieldset class="custom-section hair-section">
+                  <legend>
+                    <span>01</span>
+                    헤어 스타일
+                    <small>짧은 머리 2종 · 긴 머리 3종</small>
+                  </legend>
+                  <div class="hair-options" id="hair-options"></div>
+                </fieldset>
+                <fieldset class="custom-section">
+                  <legend>
+                    <span>02</span>
+                    머리색
+                  </legend>
+                  <div class="color-options" id="hair-colors"></div>
+                </fieldset>
+                <fieldset class="custom-section">
+                  <legend>
+                    <span>03</span>
+                    피부톤
+                  </legend>
+                  <div class="color-options" id="skin-colors"></div>
+                </fieldset>
+                <fieldset class="custom-section">
+                  <legend>
+                    <span>04</span>
+                    상의 색
+                    <small>5가지</small>
+                  </legend>
+                  <div class="color-options" id="top-colors"></div>
+                </fieldset>
+                <fieldset class="custom-section">
+                  <legend>
+                    <span>05</span>
+                    하의
+                  </legend>
+                  <div class="bottom-type-options" id="bottom-type-options">
+                    <button type="button" data-bottom-type="pants">바지</button>
+                    <button type="button" data-bottom-type="skirt">치마</button>
+                  </div>
+                  <div class="color-options" id="bottom-colors"></div>
+                </fieldset>
+                <fieldset class="custom-section accessory-section">
+                  <legend>
+                    <span>06</span>
+                    <span id="accessory-title">액세서리</span>
+                  </legend>
+                  <div class="accessory-options" id="accessory-options"></div>
+                </fieldset>
+              </div>
+            </details>
+            <div class="guestbook-fields">
+              <span class="guestbook-label">GUESTBOOK ♥ 축하의 한마디</span>
+              <p class="guestbook-public">남겨 주신 이름과 축하글은 예식장에서 다른 하객에게도 보여요.</p>
+              <label class="field-label" for="guest-name">이름</label>
+              <input
+                id="guest-name"
+                name="name"
+                type="text"
+                maxlength="12"
+                placeholder="예: 김하늘"
+                autocomplete="name"
+                required
+              />
+              <label class="field-label" for="guest-message">방명록</label>
+              <textarea
+                id="guest-message"
+                name="message"
+                maxlength="120"
+                rows="2"
+                placeholder="두 사람에게 전하고 싶은 말을 남겨주세요"
+                aria-describedby="message-count"
+                required
+              ></textarea>
+              <span class="message-count" id="message-count" aria-live="polite">0 / 120자</span>
+            </div>
+            <button class="primary-button" type="submit">
+              <span id="entry-submit-label">축하 남기고 입장하기</span>
+              <span aria-hidden="true">▶</span>
+            </button>
+          </form>
+        </div>
+      </dialog>
+
+      <section class="garden-card mini-window" id="garden-card" aria-labelledby="garden-title">
+        <div class="section-titlebar">
+          <span class="section-icon">⌂</span>
+          <span>OUR WEDDING MINI ROOM</span>
+          <span class="titlebar-end">02 / 02</span>
+        </div>
+        <div class="garden-heading">
+          <div>
+            <span class="tiny-label">WELCOME, FRIEND!</span>
+            <h2 id="garden-title">내 미니미의 행운 자리를 골라 주세요</h2>
+            <p class="garden-note">미니미가 앉는 온라인 자리예요.</p>
+          </div>
+          <div class="garden-actions" id="garden-actions" hidden>
+            <button id="honeymoon-button" type="button"><span aria-hidden="true">✈</span>신혼여행 게임</button>
+            <button id="restyle-button" type="button"><span aria-hidden="true">✿</span>내 미니미 꾸미기</button>
+            <button id="home-button" type="button"><span aria-hidden="true">♥</span>내 자리로</button>
+          </div>
+        </div>
+        <div class="venue" id="venue" aria-label="96석이 있는 온라인 예식장">
+          <div class="venue-world" id="venue-world">
+            <img class="venue-art" src="../assets/mini-wedding-hall.svg" alt="" width="720" height="1140" />
+            <button class="ceremony-couple" id="couple-greeting" type="button" aria-label="신랑 신부의 인사 듣기">
+              <span class="couple-bubble" id="couple-message">저희의 결혼에 참석해주셔서 감사합니다 ♡</span>
+              <span class="couple-figures" aria-hidden="true">
+                <span id="groom-character"></span>
+                <span id="bride-character"></span>
+              </span>
+              <span class="couple-label">진찬 ♥ 가현</span>
+            </button>
+            <div class="seat-layer" id="seat-layer"></div>
+            <div class="player" id="player" aria-hidden="true"></div>
+            <div class="speech-bubble" id="speech-bubble" hidden>
+              <strong id="bubble-name"></strong>
+              <p id="bubble-message"></p>
+            </div>
+          </div>
+          <div class="venue-shade" id="venue-shade">
+            <span>♡</span>
+            <p>미니미와 방명록을 먼저 완성해 주세요</p>
+          </div>
+          <div class="game-hud" id="game-hud" hidden>
+            <div class="status-pill" id="status-pill" role="status">빈자리를 누른 뒤 도착하면 앉기 버튼을 눌러 주세요.</div>
+            <div class="game-controls" id="game-controls">
+              <div class="joystick" id="joystick" role="img" aria-label="캐릭터 이동 조이스틱">
+                <span class="joystick-cross" aria-hidden="true">✦</span>
+                <span class="joystick-thumb" id="joystick-thumb"></span>
+              </div>
+              <button class="sit-button" id="sit-button" type="button" disabled>
+                <span class="sit-icon" aria-hidden="true">♡</span>
+                <span class="sit-label" id="sit-label">착석하기</span>
+              </button>
+            </div>
+            <div class="seated-controls" id="seated-controls" hidden>
+              <span>화면을 밀어 주변 둘러보기</span>
+            </div>
+          </div>
+          <div class="seat-checking" id="seat-checking" role="status" hidden>
+            <span class="seat-checking-heart" aria-hidden="true">♥</span>
+            <p>
+              두근두근
+              <br />
+              <b>당첨 확인 중…</b>
+            </p>
+          </div>
+          <noscript><p class="noscript">예식장을 체험하려면 JavaScript를 켜주세요.</p></noscript>
+        </div>
+      </section>
+      <section class="guestbook-board mini-window" id="guestbook-board" aria-labelledby="guestbook-board-title" hidden>
+        <div class="section-titlebar">
+          <span class="section-icon">✉</span>
+          <span>WEDDING GUESTBOOK</span>
+        </div>
+        <div class="guestbook-board-heading">
+          <h2 id="guestbook-board-title">함께 남긴 축하의 말</h2>
+          <p>하객을 누르면 그 사람의 인사로 이동해요.</p>
+        </div>
+        <div class="guestbook-feed" id="guestbook-feed" tabindex="0" aria-label="하객 축하 메시지 목록"></div>
+      </section>
+    </main>
+
+    <dialog
+      id="result-dialog"
+      class="result-dialog"
+      aria-labelledby="result-title"
+      aria-describedby="result-description"
+    >
+      <button class="dialog-close" type="button" aria-label="창 닫기" data-close>×</button>
+      <div class="result-top">
+        <span class="tiny-label" id="result-eyebrow">WITH ALL OUR LOVE</span>
+        <div class="result-art" id="result-art" aria-hidden="true">♥</div>
+        <span class="result-seat" id="result-seat"></span>
+        <h2 id="result-title" tabindex="-1" autofocus></h2>
+        <p id="result-description"></p>
+      </div>
+      <div class="ticket-divider" aria-hidden="true"></div>
+      <div class="result-bottom">
+        <span class="result-stamp" id="result-stamp"></span>
+        <p>함께해 주신 당신께, 마음을 담아</p>
+        <button class="honeymoon-cta" id="mini-game-button" type="button">
+          신혼여행 미니게임으로 떠나기
+          <span aria-hidden="true">✈</span>
+        </button>
+        <button class="primary-button" type="button" data-close>
+          예식장 둘러보기
+          <span aria-hidden="true">▶</span>
+        </button>
+      </div>
+      <div class="confetti" id="confetti" aria-hidden="true"></div>
+    </dialog>
+    <dialog id="honeymoon-dialog" class="honeymoon-dialog" aria-labelledby="honeymoon-title">
+      <button class="dialog-close" id="honeymoon-close" type="button" aria-label="신혼여행 게임 닫기">×</button>
+      <button class="sound-toggle dialog-sound" type="button" data-sound-toggle aria-pressed="true" aria-label="배경음악 끄기">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path class="sound-note" d="M9 17V6l10-2v11" />
+          <circle class="sound-note" cx="6.5" cy="17" r="2.5" />
+          <circle class="sound-note" cx="16.5" cy="15" r="2.5" />
+          <path class="sound-off" d="M4 4l16 16" />
+        </svg>
+      </button>
+      <div class="honeymoon-head">
+        <span class="tiny-label">OUR HONEYMOON · BOARDING PASS</span>
+        <h2 id="honeymoon-title" tabindex="-1" autofocus>진찬·가현의 신혼여행</h2>
+        <p>탄자니아의 사파리와 잔지바르의 바다, 어느 곳으로 떠날까요?</p>
+        <p class="gift-strip">
+          <span class="gift-strip-icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32" shape-rendering="crispEdges">
+              <rect x="6" y="15" width="20" height="14" fill="#a9677d" />
+              <rect x="7" y="16" width="18" height="12" fill="#fff9f2" />
+              <rect x="14" y="16" width="4" height="12" fill="#d98ca5" />
+              <rect x="4" y="11" width="24" height="6" fill="#a9677d" />
+              <rect x="5" y="12" width="22" height="4" fill="#f7d4df" />
+              <rect x="14" y="12" width="4" height="4" fill="#d98ca5" />
+              <rect x="7" y="6" width="7" height="6" fill="#a9677d" />
+              <rect x="8" y="7" width="5" height="4" fill="#f7d4df" />
+              <rect x="18" y="6" width="7" height="6" fill="#a9677d" />
+              <rect x="19" y="7" width="5" height="4" fill="#f7d4df" />
+              <rect x="14" y="9" width="4" height="4" fill="#d98ca5" />
+            </svg>
+          </span>
+          <span>
+            <b>게임별 1등</b>에게 선물을 드려요!
+          </span>
+        </p>
+      </div>
+      <div class="travel-tickets" role="group" aria-label="신혼여행 게임 선택">
+        <button class="travel-ticket" type="button" data-ticket-game="safari" aria-pressed="false">
+          <span class="ticket-symbol" aria-hidden="true">☀</span>
+          <span>
+            탄자니아
+            <small>SAFARI</small>
+          </span>
+        </button>
+        <button class="travel-ticket" type="button" data-ticket-game="zanzibar" aria-pressed="false">
+          <span class="ticket-symbol" aria-hidden="true">✦</span>
+          <span>
+            잔지바르
+            <small>OCEAN</small>
+          </span>
+        </button>
+      </div>
+      <div class="game-picker" id="game-picker">
+        <button class="game-choice" type="button" data-game="safari">
+          <canvas width="320" height="148" aria-hidden="true"></canvas>
+          <strong>탄자니아 사파리 점프</strong>
+          <span>은두투 평원에서 응고롱고로 분화구까지</span>
+        </button>
+        <button class="game-choice" type="button" data-game="zanzibar">
+          <canvas width="320" height="148" aria-hidden="true"></canvas>
+          <strong>잔지바르 돌고래 수영</strong>
+          <span>돌고래와 함께 산호초 사이를 헤엄쳐요</span>
+        </button>
+        <p>위의 여행 티켓으로 게임을 바로 바꿀 수 있어요. 완주하면 끝없는 보너스 구간에서 순위를 겨뤄요!</p>
+      </div>
+      <div class="game-play" id="game-play" hidden>
+        <div class="game-play-heading">
+          <button id="back-to-games" type="button">← 다른 여행지</button>
+          <strong id="game-title"></strong>
+        </div>
+        <div class="game-scorebar">
+          <span id="game-score">0점</span>
+          <span id="game-level">1단계</span>
+          <span id="game-best">내 최고 0점</span>
+        </div>
+        <canvas id="game-canvas" width="320" height="200" aria-label="신혼여행 미니게임 화면"></canvas>
+        <p class="game-instruction" id="game-instruction" aria-live="polite"></p>
+        <button class="game-action" id="game-action" type="button">탐험 시작</button>
+        <div class="game-rankings">
+          <strong>하객 순위</strong>
+          <ol id="game-ranking"></ol>
+        </div>
+      </div>
+      <div class="game-result" id="game-result" role="dialog" aria-labelledby="result-film-title" hidden>
+        <div class="game-flash" aria-hidden="true"></div>
+        <div class="film-card">
+          <div class="film-photo">
+            <img id="film-photo" alt="여행이 끝난 순간의 사진" />
+            <span class="film-date" id="film-date"></span>
+            <span class="film-stamp" id="film-stamp" hidden>완주</span>
+          </div>
+          <div class="film-caption">
+            <span class="film-from" id="film-from"></span>
+            <strong class="film-title" id="result-film-title"></strong>
+            <span class="film-reason" id="film-reason"></span>
+            <dl class="film-stats">
+              <div>
+                <dt>점수</dt>
+                <dd id="film-score"></dd>
+              </div>
+              <div>
+                <dt id="film-count-label">넘은 동물</dt>
+                <dd id="film-count"></dd>
+              </div>
+              <div>
+                <dt>하객 순위</dt>
+                <dd id="film-rank"></dd>
+              </div>
+            </dl>
+          </div>
+          <div class="film-actions">
+            <button type="button" class="film-retry" id="film-retry">다시 도전하기 ↻</button>
+            <button type="button" class="film-close" id="film-close">닫기</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+    <div class="toast" id="toast" role="status"></div>
+  </body>
+</html>

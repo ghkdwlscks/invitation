@@ -1,0 +1,12 @@
+{
+  "name": "jinchan-gahyun-wedding",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "deploy": "sh scripts/deploy.sh"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5"
+  }
+}

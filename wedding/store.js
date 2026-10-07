@@ -26,6 +26,7 @@
 
   const server = {
     mode: 'server',
+    isRealName,
     loadGuests: async () => (await call('loadGuests')).guests,
     claimSeat: payload => call('claimSeat', payload),
     updateAvatar: payload => call('updateAvatar', payload),
@@ -89,9 +90,10 @@
 
   const demo = {
     mode: 'demo',
+    isRealName,
     async loadGuests() {
       await wait(400, 800);
-      return clone(allGuests(readDb()).map(({seat, name, message, avatar}) => ({seat, name, message, avatar})));
+      return clone(allGuests(readDb()).map(({seat, name, message, avatar, at}) => ({seat, name, message, avatar, at: at ? Date.parse(at) : null})));
     },
     async claimSeat({guestId, seat, name, message, avatar}) {
       await wait(900, 1500);

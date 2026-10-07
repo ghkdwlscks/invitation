@@ -287,9 +287,26 @@
     }
   }
 
+  // 머리글 TODAY: 오늘(한국 시간) 자리에 앉은 하객 수, TOTAL: 지금까지 앉은 하객 수. 기능 확인용 이름은 세지 않는다
+  const seatedAt = new Map();
+  const koreanDay = time => new Date(Number(time) + 9 * 3600000).toISOString().slice(0, 10);
+  function renderCounts() {
+    const today = koreanDay(Date.now());
+    let todayCount = 0;
+    let total = 0;
+    for (const [seat, owner] of occupied) {
+      if (!STORE.isRealName(owner.name)) continue;
+      total++;
+      if (seatedAt.has(seat) && koreanDay(seatedAt.get(seat)) === today) todayCount++;
+    }
+    $('#today-count').textContent = String(todayCount).padStart(2, '0');
+    $('#total-count').textContent = String(total).padStart(3, '0');
+  }
+
   function applyGuests(list) {
     const changed = [];
     for (const item of list) {
+      if (item?.seat && item.at) seatedAt.set(item.seat, Number(item.at));
       if (!item || !item.seat || item.seat === guest?.seat) continue;
       const current = occupied.get(item.seat);
       if (current && current.name === item.name && current.message === item.message) continue;
@@ -302,6 +319,7 @@
     });
     if (walkTarget && occupied.has(walkTarget.id)) stopWalking();
     if (changed.length && guest?.seat) renderGuestbookBoard();
+    renderCounts();
   }
 
   async function refreshGuests() {
@@ -710,6 +728,8 @@
     guest.seat = mySeat.id;
     guest.won = Boolean(result.won);
     occupied.set(mySeat.id, guest);
+    if (!result.already) seatedAt.set(mySeat.id, Date.now());
+    renderCounts();
     saveGuest();
     renderSeat(mySeat);
     enterVenue();

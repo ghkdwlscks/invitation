@@ -75,14 +75,14 @@ textarea:focus-visible {
   border-bottom: 2px solid #a9cbd9;
 }
 .window-bar {
-  height: 32px;
-  padding: 0 13px;
+  height: 24px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   gap: 9px;
   background: #76adca;
   color: #fff;
-  font: 700 11px/1 var(--font);
+  font: 700 10px/1 var(--font);
   letter-spacing: 0.2px;
 }
 .window-controls {
@@ -91,8 +91,8 @@ textarea:focus-visible {
 }
 .window-controls i {
   display: block;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border: 1px solid #ffffffcc;
   border-radius: 2px;
   background: #f8d4d2;
@@ -105,12 +105,12 @@ textarea:focus-visible {
 }
 .window-heart {
   margin-left: auto;
-  font-size: 14px;
+  font-size: 12px;
   color: #ffe5ed;
 }
 .page-header-main {
-  min-height: 61px;
-  padding: 9px 22px;
+  min-height: 42px;
+  padding: 5px 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1454,6 +1454,10 @@ body.modal-open {
   color: #5f8fa6;
   cursor: pointer;
 }
+.page-header .sound-toggle {
+  width: 28px;
+  height: 28px;
+}
 .sound-toggle svg {
   width: 17px;
   height: 17px;
@@ -1995,7 +1999,7 @@ dialog h2[tabindex='-1']:focus {
     margin: 0 -16px;
   }
   .page-header-main {
-    padding: 8px 15px;
+    padding: 5px 15px;
   }
   .wordmark {
     font-size: 14px;

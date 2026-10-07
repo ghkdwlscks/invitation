@@ -71,7 +71,8 @@ const property = key => PropertiesService.getScriptProperties().getProperty(key)
 const winningSeats = () => property('WINNING_SEATS').split(',').map(seat => seat.trim()).filter(Boolean);
 
 function loadGuests() {
-  return {guests: rows('guests').map(guest => ({seat: guest.seat, name: guest.name, message: guest.message, avatar: parseAvatar(guest.avatar)}))};
+  // at: 자리에 앉은 시각(밀리초). 예식장 위의 TODAY·TOTAL을 세는 데 쓴다
+  return {guests: rows('guests').map(guest => ({seat: guest.seat, name: guest.name, message: guest.message, avatar: parseAvatar(guest.avatar), at: Number(guest.at) || null}))};
 }
 
 function claimSeat(body) {

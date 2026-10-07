@@ -50,9 +50,10 @@ async function buildFourcut() {
   for (const season of SEASONS) {
     const file = await findPhoto(source, season);
     if (!file) throw new Error(`첫 화면 사진이 없습니다: assets/photos/fourcut/${season}.jpg (또는 .webp, .png)`);
+    // 화면보다 넉넉한 크기(선명한 휴대폰 화면의 1.7배쯤)로 만들어 첫 화면은 빨리 뜨고 깨지지 않게 한다
     await sharp(file).rotate()
-      .resize({ width: 660, height: 880, fit: 'cover', position: sharp.strategy.attention })
-      .webp({ quality: 82 })
+      .resize({ width: 990, height: 1320, fit: 'cover', position: sharp.strategy.attention })
+      .webp({ quality: 90 })
       .toFile(path.join(DIST, 'photos', 'fourcut', `${season}.webp`));
   }
 }
@@ -70,19 +71,21 @@ async function buildGallery() {
   await mkdir(path.join(DIST, 'photos', 'gallery', 'full'), { recursive: true });
   const items = [];
   for (const [index, file] of files.entries()) {
-    const name = `${String(index + 1).padStart(2, '0')}.webp`;
+    const number = String(index + 1).padStart(2, '0');
+    const name = `${number}.webp`;
     const image = sharp(file).rotate();
     await image.clone()
-      .resize({ width: 600, height: 600, fit: 'cover', position: sharp.strategy.attention })
-      .webp({ quality: 78 })
+      .resize({ width: 800, height: 800, fit: 'cover', position: sharp.strategy.attention })
+      .webp({ quality: 85 })
       .toFile(path.join(DIST, 'photos', 'gallery', 'thumb', name));
-    await image.clone()
-      .resize({ width: 1800, height: 1800, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 84 })
-      .toFile(path.join(DIST, 'photos', 'gallery', 'full', name));
+    // 크게 보기는 원본 크기 그대로, 눈으로 구분되지 않는 최고 화질로. 사진 속 촬영 위치 같은 정보는 지운다
+    const isPng = path.extname(file).toLowerCase() === '.png';
+    const fullName = `${number}.${isPng ? 'png' : 'jpg'}`;
+    await (isPng ? image.clone().png() : image.clone().jpeg({ quality: 98, chromaSubsampling: '4:4:4' }))
+      .toFile(path.join(DIST, 'photos', 'gallery', 'full', fullName));
     const extra = index >= GALLERY_PREVIEW_COUNT ? ' class="is-extra"' : '';
-    items.push(`<li${extra}><button type="button" class="gallery-item" data-full="photos/gallery/full/${name}" aria-label="사진 ${index + 1} 크게 보기">`
-      + `<img src="photos/gallery/thumb/${name}" alt="" width="600" height="600" loading="lazy" decoding="async"></button></li>`);
+    items.push(`<li${extra}><button type="button" class="gallery-item" data-full="photos/gallery/full/${fullName}" aria-label="사진 ${index + 1} 크게 보기">`
+      + `<img src="photos/gallery/thumb/${name}" alt="" width="800" height="800" loading="lazy" decoding="async"></button></li>`);
   }
   return items.join('\n        ');
 }

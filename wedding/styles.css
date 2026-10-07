@@ -901,14 +901,14 @@ dialog.entry-card .guestbook-fields textarea {
   align-items: flex-end;
   justify-content: center;
   gap: 12px;
-  width: 128px;
+  width: 100px;
   height: 70px;
   filter: drop-shadow(2px 3px 2px #5e64704d);
 }
 .couple-figures > span {
   display: block;
-  width: 58px;
-  height: 70px;
+  width: 44px;
+  height: 57px;
 }
 .couple-figures .character {
   width: 100%;

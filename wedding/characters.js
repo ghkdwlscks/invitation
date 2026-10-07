@@ -40,8 +40,8 @@
   };
   const skins = [
     {id: 'light', label: '밝은 피부', hex: '#f8dfc8'},
-    {id: 'warm', label: '살구 피부', hex: '#e7bb98'},
-    {id: 'deep', label: '갈색 피부', hex: '#b88163'}
+    {id: 'warm', label: '살구 피부', hex: '#f0caa9'},
+    {id: 'deep', label: '갈색 피부', hex: '#cc9a78'}
   ];
   const accessories = {
     // view: 고르기 버튼에서 미니미의 어느 부분을 잘라 보여줄지 (SVG viewBox)
@@ -102,6 +102,8 @@
     return {
       cells,
       set,
+      // 빈 칸에만 칠한다(이미 그린 것 뒤에 놓인다)
+      under(list, color) { for (const [y, from, to] of list) for (let x = from; x <= to; x++) if (!cells.has(key(x, y))) set(x, y, color); },
       // 이어서 칠하는 부위의 바깥 테두리 색
       pen(color) { pen = color; },
       // [줄, 시작 칸, 끝 칸] 목록으로 칠한다
@@ -113,10 +115,11 @@
     };
   }
 
-  // 바깥 테두리를 한 칸 두르고 SVG로 만든다(같은 색이 이어진 칸은 하나로 묶는다)
-  function toSvg(c) {
+  // 아직 테두리가 없는 부위에 바깥 테두리를 한 칸 두른다
+  function outline(c) {
     const edges = new Map();
-    for (const [index, [, line]] of c.cells) {
+    for (const [index, [, line, done]] of c.cells) {
+      if (done) continue;
       const x = index % W, y = Math.floor(index / W);
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const nx = x + dx, ny = y + dy;
@@ -127,6 +130,12 @@
       }
     }
     for (const [at, line] of edges) c.cells.set(at, [line, line]);
+    for (const cell of c.cells.values()) cell[2] = true;
+  }
+
+  // SVG로 만든다(같은 색이 이어진 칸은 하나로 묶는다)
+  function toSvg(c) {
+    outline(c);
     let rects = '';
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W;) {
@@ -147,12 +156,13 @@
 
   function drawHairBack(c, hair, color, dark) {
     if (hair === 'bob') {
-      c.rows([...range(7, 21, 4, 27), [22, 5, 9], [22, 22, 26]], color);
+      c.rows([[7, 6, 25], [8, 5, 26], ...range(9, 21, 4, 27), [22, 5, 9], [22, 22, 26]], color);
     }
     if (hair === 'long') {
-      c.rows([...range(7, 30, 4, 27), [31, 4, 8], [31, 23, 27], [32, 4, 7], [32, 24, 27], [33, 5, 6], [33, 25, 26]], color);
+      c.rows([[7, 6, 25], [8, 5, 26], ...range(9, 30, 4, 27), [31, 4, 8], [31, 23, 27], [32, 4, 7], [32, 24, 27], [33, 5, 6], [33, 25, 26]], color);
       c.rows([...range(16, 31, 5, 5), ...range(19, 32, 26, 26)], dark);
     }
+    if (hair === 'updo') c.rows([[0, 14, 17], [1, 12, 19], [2, 12, 19], [3, 13, 18]], color);
     if (hair === 'pony') {
       c.rows([[5, 24, 27], [6, 24, 28], [7, 24, 28], [8, 25, 29], ...range(9, 15, 26, 29), ...range(16, 19, 26, 28), [20, 27, 28], [21, 27, 27]], color);
     }
@@ -160,20 +170,24 @@
 
   function drawHairFront(c, hair, color, light, dark, line) {
     // 정수리는 머리 위쪽을 모두 덮는다
-    const top = hair === 'long' ? 10 : hair === 'side' ? 11 : 12;
+    const top = hair === 'long' || hair === 'updo' ? 10 : hair === 'side' ? 9 : 12;
     c.rows(HEAD.filter(([y]) => y <= top), color);
     if (hair === 'neat') {
       c.rows([[3, 12, 13], [3, 17, 18], [13, 6, 8], [13, 11, 12], [13, 16, 17], [13, 21, 25], ...range(14, 17, 6, 6), ...range(14, 17, 25, 25)], color);
     }
     if (hair === 'side') {
       // 가르마: 이마 오른쪽이 드러나고 앞머리가 왼쪽으로 넘어간다
-      c.rows([[3, 11, 16], [12, 6, 17], [13, 6, 13], [14, 6, 9], ...range(15, 17, 6, 6), [12, 22, 25], [13, 24, 25], ...range(14, 17, 25, 25)], color);
+      c.rows([[3, 13, 19], [2, 15, 18], [10, 6, 8], [10, 12, 25], [11, 6, 7], [11, 15, 25], [12, 6, 6], [12, 18, 25], [13, 21, 25], [14, 23, 25], ...range(13, 17, 6, 6), ...range(15, 17, 25, 25)], color);
     }
     if (hair === 'bob' || hair === 'pony') {
       c.rows([[13, 6, 8], [13, 10, 14], [13, 17, 21], [13, 23, 25]], color);
     }
     if (hair === 'bob') c.rows([...range(13, 22, 5, 7), ...range(13, 22, 24, 26)], color);
     if (hair === 'pony') c.rows([...range(14, 16, 6, 6), ...range(14, 16, 25, 25)], color);
+    if (hair === 'updo') {
+      // 가운데 가르마로 넘겨 귀 뒤로 묶은 머리
+      c.rows([[11, 6, 13], [11, 18, 25], [12, 6, 10], [12, 21, 25], [13, 6, 8], [13, 23, 25], ...range(14, 16, 6, 6), ...range(14, 16, 25, 25)], color);
+    }
     if (hair === 'long') {
       // 가운데 가르마, 양옆으로 흘러내린 앞머리
       c.rows([[11, 6, 13], [11, 18, 25], [12, 6, 11], [12, 20, 25], [13, 6, 9], [13, 22, 25], ...range(14, 23, 5, 7), ...range(14, 23, 24, 26)], color);
@@ -181,8 +195,8 @@
     // 윤기 띠와 오른쪽 그늘
     c.tint([[6, 10, 12], [6, 19, 21], [7, 9, 22], [8, 13, 18]], light, color);
     c.tint([[5, 21, 21], [6, 23, 23], [7, 24, 24], ...range(8, 22, 24, 26)], dark, color);
-    if (hair === 'side') c.tint([[4, 18, 18], [5, 18, 18], [6, 18, 18], [7, 17, 17]], dark, color);
-    if (hair === 'long') { c.tint([[7, 15, 16]], dark, light); c.tint([[4, 15, 16], [5, 15, 16], [6, 15, 16]], dark, color); }
+    if (hair === 'side') { c.tint([[5, 11, 11], [6, 11, 11], [7, 11, 11], [8, 10, 10], [9, 10, 10]], dark, color); c.tint([[6, 11, 11], [7, 11, 11]], dark, light); }
+    if (hair === 'long' || hair === 'updo') { c.tint([[7, 15, 16]], dark, light); c.tint([[4, 15, 16], [5, 15, 16], [6, 15, 16]], dark, color); }
     // 얼굴과 닿는 머리 끝은 진한 선으로 나눈다
     for (let x = 4; x <= 27; x++) {
       for (let y = 9; y <= 23; y++) {
@@ -208,7 +222,7 @@
 
   function render(value = {}, formal = '') {
     const avatar = normalize(value);
-    const hair = formal === 'groom' ? 'side' : formal === 'bride' ? 'long' : avatar.hair;
+    const hair = formal === 'groom' ? 'side' : formal === 'bride' ? 'updo' : avatar.hair;
     const hairColor = formal === 'groom' ? '#2c2a30' : formal === 'bride' ? '#3d2c2a' : pick(colors.hair, avatar.hairColor, defaults.hairColor).hex;
     const skin = pick(skins, avatar.skin, defaults.skin).hex;
     const skinLine = mix(skin, '#6e2c14', .72);
@@ -221,44 +235,26 @@
     const hairLine = mix(hairColor, '#160c0c', .62);
     const c = canvas();
 
-    // 베일과 뒷머리는 몸보다 뒤에 있다
-    if (formal === 'bride') {
-      c.pen(VEIL_EDGE);
-      // 머리 위에서 엉덩이 아래까지 내려오며 조금씩 넓어진다. 끝단은 물결 모양
-      for (let y = 3; y <= 41; y++) {
-        const left = Math.max(2, Math.round(9 - Math.sqrt(y - 3) * 1.15));
-        c.rows(y === 41 ? [[y, left + 1, left + 3], [y, W - 4 - left, W - 2 - left]] : [[y, left, W - 1 - left]], VEIL);
-      }
-      for (const [x, y] of [[5, 14], [26, 18], [4, 25], [27, 31], [3, 37]]) c.set(x, y, '#ffffff');
-      c.rows([...range(24, 40, 4, 4), ...range(28, 40, 27, 27)], '#efe8e5');
-    }
+    // 뒷머리는 몸보다 뒤에 있다
     c.pen(hairLine);
     drawHairBack(c, hair, hairColor, mix(hairColor, '#160c0c', .25));
 
     if (formal === 'bride') {
-      // 어깨가 드러난 웨딩드레스, 허리 아래로 넓게 퍼진다
+      // 어깨와 팔이 드러난 튜브톱 웨딩드레스, 허리 아래로 넓게 퍼진다
       const dress = '#fdfbf7', fold = '#ece4de';
-      c.pen('#aa9f9c');
-      c.rows([[27, 10, 14], [27, 17, 21], ...range(28, 32, 10, 21), [33, 11, 20]], dress);
-      for (let i = 0; i <= 14; i++) c.rows([[34 + i, 11 - Math.ceil(i * .55), 20 + Math.ceil(i * .55)]], dress);
-      c.rows([[33, 11, 20]], '#efe5dd');
-      for (const [x, y1] of [[9, 40], [13, 37], [18, 37], [22, 40]]) for (let y = y1; y <= 47; y++) c.set(x, y, fold);
-      c.rows([[48, 4, 27]], fold);
-      c.rows([[28, 21, 21], [29, 21, 21], [30, 21, 21], [31, 21, 21], [32, 21, 21]], fold);
-      // 드러난 어깨와 팔, 가운데로 모은 손
       c.pen(skinLine);
-      c.rows([[25, 10, 21], [26, 9, 22], [27, 15, 16], ...range(27, 30, 7, 8), ...range(27, 30, 23, 24), [31, 8, 9], [31, 22, 23], [32, 9, 11], [32, 20, 22], [33, 10, 11], [33, 20, 21]], skin);
-      c.rows([...range(27, 30, 8, 8), [31, 9, 9], [27, 9, 9], [27, 22, 22]], skinShadow);
-      c.rows([...range(27, 30, 9, 9), ...range(27, 30, 22, 22)], '#aa9f9c');
-      c.rows([[25, 13, 18]], skin);
-      c.set(23, 30, skinShadow); c.set(22, 31, skinShadow);
-      // 부케
-      c.pen('#8f7f7c');
-      c.rows([[30, 13, 18], [31, 12, 19], [32, 12, 19], [33, 12, 19], [34, 13, 18]], '#fbe9ee');
-      for (const [x, y] of [[13, 31], [16, 30], [18, 32], [14, 33], [16, 32]]) c.set(x, y, '#f09db3');
-      for (const [x, y] of [[15, 31], [17, 33], [12, 32]]) c.set(x, y, '#ffffff');
-      c.pen('#5e7a58');
-      c.rows([[35, 14, 17], [36, 15, 16]], '#93b48b');
+      c.rows([[25, 9, 22], ...range(26, 27, 8, 23), ...range(28, 34, 8, 8), ...range(28, 34, 23, 23)], skin);
+      c.rows([...range(26, 34, 23, 23)], skinShadow);
+      c.rows([...range(35, 37, 7, 8), ...range(35, 37, 23, 24), [36, 24, 24], [37, 8, 8], [37, 24, 24]], skin);
+      c.rows([[36, 24, 24], [37, 8, 8], [37, 24, 24]], skinShadow);
+      c.pen('#aa9f9c');
+      c.rows([...range(28, 35, 10, 21)], dress);
+      for (let i = 0; i <= 12; i++) c.rows([[36 + i, 10 - Math.ceil(i * .55), 21 + Math.ceil(i * .55)]], dress);
+      c.rows([[28, 10, 21]], '#f3ece6');
+      c.rows([[33, 10, 21]], '#efe5dd');
+      c.rows([...range(29, 35, 21, 21)], fold);
+      for (const [x, y1] of [[8, 41], [12, 38], [19, 38], [23, 41]]) for (let y = y1; y <= 47; y++) c.set(x, y, fold);
+      c.rows([[48, 3, 28]], fold);
     } else {
       const topLine = lineOf(top), topShadow = shadowOf(top);
       const bottomLine = lineOf(bottom), bottomShadow = shadowOf(bottom);
@@ -333,9 +329,8 @@
     if (formal === 'bride') {
       // 진주 머리장식
       c.pen('#b9aea6');
-      c.rows([[3, 12, 19]], '#fffaf0');
-      for (const x of [13, 16, 18]) c.set(x, 2, '#fffaf0');
-      c.set(15, 2, '#f4dfe4');
+      for (const x of [9, 11, 13, 15, 16, 18, 20, 22]) c.set(x, x < 12 || x > 19 ? 6 : 5, '#fffaf0');
+      c.set(15, 4, '#f4dfe4'); c.set(16, 4, '#f4dfe4');
     }
 
     // 액세서리
@@ -399,6 +394,20 @@
       c.rows([[7, 20, 20], [6, 21, 21]], '#ffc4d3');
       c.pen('#4f6d4a');
       c.rows([[10, 25, 26], [11, 25, 26]], '#8fb488');
+    }
+
+    // 베일: 신부를 다 그리고 테두리를 두른 뒤 빈 칸에만 칠해 뒤에 놓는다
+    if (formal === 'bride') {
+      outline(c);
+      c.pen(VEIL_EDGE);
+      // 쪽머리에서 시작해 머리 양옆으로 퍼지고, 엉덩이 아래까지 내려온다. 끝단은 물결 모양
+      c.under([[2, 11, 20], [3, 8, 23], [4, 6, 25], [5, 5, 26]], VEIL);
+      for (let y = 6; y <= 41; y++) {
+        const left = Math.max(1, Math.round(4.4 - (y - 6) * .09));
+        c.under(y === 41 ? [[y, left + 1, left + 3], [y, W - 4 - left, W - 2 - left]] : [[y, left, W - 1 - left]], VEIL);
+      }
+      c.tint([...range(12, 40, 3, 3), ...range(16, 40, 28, 28)], '#efe8e5', VEIL);
+      for (const [x, y] of [[4, 9], [27, 13], [3, 21], [28, 27], [2, 35]]) c.tint([[y, x, x]], '#ffffff', VEIL);
     }
 
     return `<svg class="character" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true">${toSvg(c)}</svg>`;

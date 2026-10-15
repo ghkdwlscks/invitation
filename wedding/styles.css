@@ -572,9 +572,6 @@ dialog.entry-card .preview-caption {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
-.hair-group:first-child .hair-group-choices {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
 .hair-choice {
   display: flex;
   align-items: center;
@@ -596,6 +593,11 @@ dialog.entry-card .preview-caption {
   width: 46px;
   height: 62px;
   flex: none;
+}
+/* 이름이 길면 글자 중간이 아니라 낱말 사이에서 줄을 바꾼다 */
+.hair-choice span {
+  word-break: keep-all;
+  line-height: 1.3;
 }
 .hair-choice:hover,
 .color-choice:hover,

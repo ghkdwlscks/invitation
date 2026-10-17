@@ -5,12 +5,12 @@
   const STORAGE_KEY = 'wedding-hall-guest-v4';
   const DRAFT_KEY = 'wedding-hall-draft-v1';
   const GUEST_ID_KEY = 'wedding-guest-id';
-  const WORLD_WIDTH = 720;
-  // 이름표가 뒷줄 미니미에 가리지 않도록 줄 간격을 넉넉히 두었다(바닥 그림도 그만큼 길게 늘림)
-  const WORLD_HEIGHT = 1120;
+  // 통로 양옆에 6석씩 16줄(192석). 이름표가 뒷줄 미니미에 가리지 않도록 줄 간격을 넉넉히 두었다
+  const WORLD_WIDTH = 1016;
+  const WORLD_HEIGHT = 1376;
   const ROW_GAP = 64;
-  const ROWS = 12;
-  const COLUMNS = 8;
+  const ROWS = 16;
+  const COLUMNS = 12;
   const SEAT_DISTANCE = 82;
   const TAP_SLOP = 8;
   const MOVE_SPEED = 205;
@@ -38,7 +38,7 @@
   const keys = new Set();
   let guest = readGuest();
   let avatarDraft = MINIMI.normalize();
-  let position = {x: 360, y: WORLD_HEIGHT - 55};
+  let position = {x: WORLD_WIDTH / 2, y: WORLD_HEIGHT - 55};
   let stick = {x: 0, y: 0};
   let activePointer = null;
   let nearestSeat = null;
@@ -245,7 +245,7 @@
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLUMNS; col++) {
         const id = `${String.fromCharCode(65 + row)}${col + 1}`;
-        const x = col < 4 ? 52 + col * 74 : 446 + (col - 4) * 74;
+        const x = col < COLUMNS / 2 ? 52 + col * 74 : 594 + (col - COLUMNS / 2) * 74;
         const y = 360 + row * ROW_GAP;
         const element = document.createElement('div');
         element.className = 'seat';
@@ -447,7 +447,7 @@
     world.style.transform = `translate(${cameraX}px, ${cameraY}px)`;
     const bubbleHalfWidth = 100;
     const margin = 8;
-    const center = 360 + cameraX;
+    const center = WORLD_WIDTH / 2 + cameraX;
     const clampedCenter = Math.max(bubbleHalfWidth + margin, Math.min(venue.clientWidth - bubbleHalfWidth - margin, center));
     coupleBubble.style.setProperty('--bubble-shift', `${clampedCenter - center}px`);
   }
@@ -794,7 +794,7 @@
   else {
     playerElement.hidden = true;
     document.body.classList.add('is-entering');
-    setCamera(venue.clientWidth / 2 - 360, -60);
+    setCamera(venue.clientWidth / 2 - WORLD_WIDTH / 2, -60);
     entryDialog.showModal();
     entryDialog.scrollTop = 0;
     $('#entry-title').focus({preventScroll: true});

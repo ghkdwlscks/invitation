@@ -832,8 +832,8 @@ dialog.entry-card .guestbook-fields textarea {
   position: absolute;
   left: 0;
   top: 0;
-  width: 720px;
-  height: 1120px;
+  width: 1016px;
+  height: 1376px;
   overflow: hidden;
   background: #efeeeb;
   will-change: transform;
@@ -843,14 +843,14 @@ dialog.entry-card .guestbook-fields textarea {
   position: absolute;
   top: 0;
   left: 0;
-  width: 720px;
-  height: 1140px;
+  width: 1016px;
+  height: 1396px;
   pointer-events: none;
 }
 .ceremony-couple {
   position: absolute;
   z-index: 5;
-  left: 360px;
+  left: 508px;
   top: 134px;
   transform: translateX(-50%);
   display: flex;

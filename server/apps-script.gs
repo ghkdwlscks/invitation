@@ -78,7 +78,7 @@ function loadGuests() {
 function claimSeat(body) {
   const guestId = text(body.guestId, 64);
   const seat = text(body.seat, 4);
-  if (!guestId || !/^[A-L][1-8]$/.test(seat)) throw new Error('잘못된 요청이에요');
+  if (!guestId || !/^[A-P](?:[1-9]|1[0-2])$/.test(seat)) throw new Error('잘못된 요청이에요');
   return withLock(() => {
     const guests = rows('guests');
     // 같은 하객의 재시도·연타는 새로 등록하지 않고 앞의 자리를 돌려준다

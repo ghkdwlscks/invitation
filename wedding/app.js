@@ -5,9 +5,10 @@
   const STORAGE_KEY = 'wedding-hall-guest-v4';
   const DRAFT_KEY = 'wedding-hall-draft-v1';
   const GUEST_ID_KEY = 'wedding-guest-id';
-  // 통로 양옆에 6석씩 16줄(192석). 이름표가 뒷줄 미니미에 가리지 않도록 줄 간격을 넉넉히 두었다
-  const WORLD_WIDTH = 1016;
+  // 통로 양옆에 6석씩 16줄(192석). 옆자리는 촘촘히 붙이고, 이름표가 뒷줄 미니미에 가리지 않도록 줄 간격은 넉넉히 두었다
+  const WORLD_WIDTH = 836;
   const WORLD_HEIGHT = 1376;
+  const SEAT_GAP = 56;
   const ROW_GAP = 64;
   const ROWS = 16;
   const COLUMNS = 12;
@@ -245,7 +246,7 @@
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLUMNS; col++) {
         const id = `${String.fromCharCode(65 + row)}${col + 1}`;
-        const x = col < COLUMNS / 2 ? 52 + col * 74 : 594 + (col - COLUMNS / 2) * 74;
+        const x = col < COLUMNS / 2 ? 52 + col * SEAT_GAP : WORLD_WIDTH - 52 - (COLUMNS - 1 - col) * SEAT_GAP;
         const y = 360 + row * ROW_GAP;
         const element = document.createElement('div');
         element.className = 'seat';

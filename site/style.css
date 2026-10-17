@@ -322,12 +322,12 @@ html.js .fourcut-hero.is-printing .print-stack {
   line-height: 1.7;
 }
 /* 온라인 예식장 입구: 싸이월드 미니홈피 창처럼, 청첩장의 핑크·아이보리 뮤트톤으로.
-   탭이 창 오른쪽 밖으로 튀어나오도록 그만큼 창을 좁힌다 */
+   탭이 창 오른쪽 밖으로 튀어나오도록 그만큼 창을 좁히고, 왼쪽도 같은 만큼 띄워 가운데에 둔다 */
 .wedding-room-card {
   position: relative;
   display: block;
-  width: calc(100% - 24px);
-  margin: 19px 24px 0 0;
+  width: calc(100% - 48px);
+  margin: 19px 24px 0;
   padding: 0;
   border: 1px solid #d8c7c6;
   border-radius: 8px;
@@ -366,13 +366,18 @@ html.js .fourcut-hero.is-printing .print-stack {
   background: #c9d3c4;
 }
 .minihome-title {
-  flex: 1;
+  flex: 1 0 auto;
   font-weight: 700;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 .minihome-bgm {
+  min-width: 0;
+  overflow: hidden;
   color: #a28489;
   font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .minihome-main {
   display: block;

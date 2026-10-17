@@ -1292,11 +1292,9 @@ dialog.entry-card .guestbook-fields textarea {
 .garden-card .venue {
   border-radius: 0 0 10px 10px;
 }
-/* 탭이 오른쪽을 차지하는 만큼 왼쪽도 띄워 창이 화면 가운데에 오게 */
 .has-hall-tabs .garden-card,
 .has-hall-tabs .guestbook-board {
   margin-right: 14px;
-  margin-left: 14px;
 }
 .hall-tabs {
   position: absolute;

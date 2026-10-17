@@ -716,96 +716,58 @@ html.js .fourcut-hero.is-printing .print-stack {
   box-shadow: 0 1px 4px rgba(50, 45, 48, 0.13);
 }
 
-/* 주차 안내: 펼치지 않아도 보이게. 예식 안내 줄과 같은 결로, 상자 없이 */
-.parking-guide {
+/* 주차·지하철 안내: 펼치지 않아도 보이게. 예식 안내 줄과 같은 결로, 상자 없이 */
+.route-guide {
   margin: 26px 0 0;
 }
-.parking-title {
+.route-title {
   margin: 0;
   color: var(--accent);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
-.parking-note {
+.route-note {
   margin: 6px 0 12px;
   color: var(--ink-soft);
   font-size: 14px;
   line-height: 1.65;
 }
-.parking-info {
+.route-info {
   margin: 0;
   border-top: 1px solid var(--line);
 }
-.parking-info div {
+.route-title + .route-info {
+  margin-top: 12px;
+}
+.route-info div {
   display: grid;
   grid-template-columns: 76px 1fr;
   gap: 10px;
   padding: 11px 0;
   border-bottom: 1px solid var(--line);
 }
-.parking-info dt {
+.route-info dt {
   color: var(--label);
   font-size: 12.5px;
   font-weight: 700;
   line-height: 1.6;
 }
-.parking-info dd {
+.route-info dd {
   margin: 0;
   color: var(--ink);
   font-size: 14px;
   line-height: 1.6;
 }
-.parking-entrance strong {
+.route-info strong {
   display: block;
   font-size: 15px;
   font-weight: 700;
 }
-.parking-entrance span {
+.route-info span {
   display: block;
   color: #a17f86;
   font-size: 13px;
-}
-.parking-details {
-  margin-top: 10px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.parking-details summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 42px;
-  cursor: pointer;
-  list-style: none;
-  font-size: 14px;
-}
-.parking-details summary::-webkit-details-marker {
-  display: none;
-}
-.parking-details summary::after {
-  content: '+';
-  color: #8c7971;
-  font-size: 20px;
-}
-.parking-details[open] summary::after {
-  content: '−';
-}
-.parking-details dl {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 8px;
-  margin: 0;
-  padding: 0 0 15px;
-  font-size: 13.5px;
-  line-height: 1.55;
-}
-.parking-details dt {
-  font-weight: 700;
-}
-.parking-details dd {
-  margin: 0;
-  color: #50564f;
 }
 
 /* 배경음악 버튼 */

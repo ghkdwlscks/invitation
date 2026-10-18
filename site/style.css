@@ -888,19 +888,13 @@ html.js .fourcut-hero.is-printing .print-stack {
   font-size: 14.5px;
   line-height: 1.4;
 }
-.gift-account-number,
-.gift-account-pending {
+.gift-account-number {
   display: block;
   margin-top: 2px;
   color: #5b625d;
   font-size: 12.5px;
   line-height: 1.4;
-}
-.gift-account-number {
   user-select: all;
-}
-.gift-account-pending {
-  color: #85807a;
 }
 .gift-account-copy {
   flex: none;

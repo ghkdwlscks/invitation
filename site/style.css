@@ -705,14 +705,16 @@ html.js .fourcut-hero.is-printing .print-stack {
 .map-apps {
   display: flex;
   justify-content: center;
-  gap: 34px;
+  gap: 16px;
   margin-top: 18px;
 }
+/* 이름 길이가 달라도 아이콘 간격이 같고 가운데 아이콘이 화면 가운데 오도록 칸 너비를 똑같이 */
 .map-apps a {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 7px;
+  width: 64px;
   color: #464c49;
   font-size: 12px;
 }
@@ -1126,7 +1128,7 @@ html.js .reveal.is-visible {
     font-size: 11.5px;
   }
   .map-apps {
-    gap: 24px;
+    gap: 8px;
   }
   .countdown-units div {
     width: 56px;

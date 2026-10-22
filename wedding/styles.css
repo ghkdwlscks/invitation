@@ -838,6 +838,7 @@ dialog.entry-card .guestbook-fields textarea {
   height: 1376px;
   overflow: hidden;
   background: #efeeeb;
+  transform-origin: 0 0;
   will-change: transform;
 }
 .venue-art {

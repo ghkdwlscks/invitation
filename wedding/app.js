@@ -15,6 +15,7 @@
   const SEAT_DISTANCE = 82;
   const TAP_SLOP = 8;
   const MOVE_SPEED = 205;
+  const MAX_ZOOM = 2;
   const MINIMI = window.MINIMI;
   const STORE = window.WEDDING_STORE;
   const REFRESH_INTERVAL = 30000;
@@ -46,7 +47,10 @@
   let lastTime = 0;
   let cameraX = 0;
   let cameraY = 0;
+  let zoom = 1;
   let pointerGesture = null;
+  let pinch = null;
+  const touches = new Map();
   let walkTarget = null;
   let walkSpeed = 0;
   let cameraFollow = true;
@@ -424,8 +428,8 @@
   function followCamera(elapsed) {
     if (guest?.seat || !cameraFollow) return;
     const ease = 1 - Math.exp(-elapsed * 10);
-    const targetX = venue.clientWidth / 2 - position.x;
-    const targetY = venue.clientHeight * .43 - position.y;
+    const targetX = venue.clientWidth / 2 - position.x * zoom;
+    const targetY = venue.clientHeight * .43 - position.y * zoom;
     setCamera(cameraX + (targetX - cameraX) * ease, cameraY + (targetY - cameraY) * ease);
   }
 
@@ -442,19 +446,77 @@
     walkTarget = null;
   }
 
+  // 가장 작게 하면 예식장 전체가 화면에 꽉 찬다(바깥 빈 곳은 보이지 않게)
+  function clampZoom(value) {
+    const smallest = Math.min(1, Math.max(venue.clientWidth / WORLD_WIDTH, venue.clientHeight / WORLD_HEIGHT));
+    return Math.min(MAX_ZOOM, Math.max(smallest, value));
+  }
+
   function setCamera(x, y) {
-    cameraX = Math.min(0, Math.max(venue.clientWidth - WORLD_WIDTH, x));
-    cameraY = Math.min(0, Math.max(venue.clientHeight - WORLD_HEIGHT, y));
-    world.style.transform = `translate(${cameraX}px, ${cameraY}px)`;
-    const bubbleHalfWidth = 100;
+    zoom = clampZoom(zoom);
+    cameraX = Math.min(0, Math.max(venue.clientWidth - WORLD_WIDTH * zoom, x));
+    cameraY = Math.min(0, Math.max(venue.clientHeight - WORLD_HEIGHT * zoom, y));
+    world.style.transform = `translate(${cameraX}px, ${cameraY}px) scale(${zoom})`;
+    const bubbleHalfWidth = 100 * zoom;
     const margin = 8;
-    const center = WORLD_WIDTH / 2 + cameraX;
+    const center = WORLD_WIDTH / 2 * zoom + cameraX;
     const clampedCenter = Math.max(bubbleHalfWidth + margin, Math.min(venue.clientWidth - bubbleHalfWidth - margin, center));
-    coupleBubble.style.setProperty('--bubble-shift', `${clampedCenter - center}px`);
+    coupleBubble.style.setProperty('--bubble-shift', `${(clampedCenter - center) / zoom}px`);
   }
 
   function centerCameraOn(seat) {
-    setCamera(venue.clientWidth / 2 - seat.x, venue.clientHeight * .43 - seat.y);
+    setCamera(venue.clientWidth / 2 - seat.x * zoom, venue.clientHeight * .43 - seat.y * zoom);
+  }
+
+  // 화면 위 한 점(예식장 칸 기준)이 가리키는 곳은 그대로 둔 채 크게·작게
+  function zoomAround(nextZoom, screenX, screenY) {
+    const worldX = (screenX - cameraX) / zoom;
+    const worldY = (screenY - cameraY) / zoom;
+    zoom = clampZoom(nextZoom);
+    setCamera(screenX - worldX * zoom, screenY - worldY * zoom);
+    sharpenAfterZoom();
+  }
+
+  // 크기를 바꾼 뒤 잠깐 멈추면 그 크기로 다시 그려 확대해도 흐릿하지 않게
+  let sharpenTimer;
+  function sharpenAfterZoom() {
+    clearTimeout(sharpenTimer);
+    sharpenTimer = setTimeout(() => {
+      world.style.willChange = 'auto';
+      requestAnimationFrame(() => { world.style.willChange = ''; });
+    }, 150);
+  }
+
+  function venueOffset() {
+    const box = venue.getBoundingClientRect();
+    return {x: box.left + venue.clientLeft, y: box.top + venue.clientTop};
+  }
+
+  // 두 손가락: 처음 벌린 거리와 두 손가락 가운데가 가리키는 곳을 기억해 두고 손가락을 따라 크게·작게·이동
+  function startPinch() {
+    const [first, second] = [...touches.values()];
+    const offset = venueOffset();
+    const middleX = (first.x + second.x) / 2 - offset.x;
+    const middleY = (first.y + second.y) / 2 - offset.y;
+    pinch = {distance: Math.max(1, Math.hypot(first.x - second.x, first.y - second.y)), zoom, worldX: (middleX - cameraX) / zoom, worldY: (middleY - cameraY) / zoom};
+    pointerGesture = null;
+    cameraFollow = false;
+    bubble.hidden = true;
+  }
+
+  function movePinch() {
+    const [first, second] = [...touches.values()];
+    const offset = venueOffset();
+    zoom = clampZoom(pinch.zoom * Math.hypot(first.x - second.x, first.y - second.y) / pinch.distance);
+    setCamera((first.x + second.x) / 2 - offset.x - pinch.worldX * zoom, (first.y + second.y) / 2 - offset.y - pinch.worldY * zoom);
+    sharpenAfterZoom();
+  }
+
+  function endTouch(id) {
+    if (!touches.delete(id) || !pinch || touches.size >= 2) return;
+    pinch = null;
+    // 남은 한 손가락으로는 이어서 화면을 민다(그 손가락을 떼도 자리 누르기로 치지 않는다)
+    for (const [rest, point] of touches) pointerGesture = {id: rest, startX: point.x, startY: point.y, x: point.x, y: point.y, moved: true, seatElement: null};
   }
 
   function setStatus(text) {
@@ -655,6 +717,10 @@
   }
   venue.addEventListener('pointerdown', event => {
     if (!guest || resultDialog.open || event.target.closest('button, .game-controls, .seated-controls')) return;
+    touches.set(event.pointerId, {x: event.clientX, y: event.clientY});
+    venue.setPointerCapture(event.pointerId);
+    if (touches.size === 2) { startPinch(); return; }
+    if (touches.size > 2) return;
     pointerGesture = {
       id: event.pointerId,
       startX: event.clientX,
@@ -664,9 +730,11 @@
       moved: false,
       seatElement: event.target.closest('.seat')
     };
-    venue.setPointerCapture(event.pointerId);
   });
   venue.addEventListener('pointermove', event => {
+    if (!touches.has(event.pointerId)) return;
+    touches.set(event.pointerId, {x: event.clientX, y: event.clientY});
+    if (pinch) { movePinch(); return; }
     if (!pointerGesture || event.pointerId !== pointerGesture.id) return;
     if (!pointerGesture.moved && Math.hypot(event.clientX - pointerGesture.startX, event.clientY - pointerGesture.startY) < TAP_SLOP) return;
     pointerGesture.moved = true;
@@ -677,6 +745,7 @@
     bubble.hidden = true;
   });
   venue.addEventListener('pointerup', event => {
+    endTouch(event.pointerId);
     if (!pointerGesture || event.pointerId !== pointerGesture.id) return;
     const {moved, seatElement} = pointerGesture;
     pointerGesture = null;
@@ -686,9 +755,20 @@
   });
   for (const name of ['pointercancel', 'lostpointercapture']) {
     venue.addEventListener(name, event => {
+      endTouch(event.pointerId);
       if (pointerGesture?.id === event.pointerId) pointerGesture = null;
     });
   }
+  // 노트북 터치패드에서 두 손가락 벌리기·오므리기(Ctrl+휠로 들어온다), Ctrl+마우스 휠
+  venue.addEventListener('wheel', event => {
+    if (!guest || !event.ctrlKey) return;
+    event.preventDefault();
+    cameraFollow = false;
+    const offset = venueOffset();
+    zoomAround(zoom * Math.exp(-event.deltaY * .003), event.clientX - offset.x, event.clientY - offset.y);
+  }, {passive: false});
+  // 아이폰 사파리가 예식장 안에서 두 손가락을 화면 전체 확대로 가져가지 않게
+  venue.addEventListener('gesturestart', event => { if (guest) event.preventDefault(); });
   window.addEventListener('keydown', event => {
     if (!guest || guest.seat || /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(event.key)) { keys.add(event.key); event.preventDefault(); }

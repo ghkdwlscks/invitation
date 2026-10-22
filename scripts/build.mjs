@@ -10,6 +10,8 @@ const PHOTOS = path.join(ROOT, 'assets', 'photos');
 const IMAGE_FILE = /\.(jpe?g|png|webp|avif|tiff?)$/i;
 const SEASONS = ['winter', 'spring', 'summer', 'autumn'];
 const GALLERY_PREVIEW_COUNT = 12;
+// 작은 네모 사진에서 두 사람이 잘리는 사진만 보일 자리를 정해 둔다(가로·세로 0~1, 0은 왼쪽·위 끝, 1은 오른쪽·아래 끝)
+const THUMB_FOCUS = { '6.jpg': [0.5, 1], '9.jpg': [0.5, 0.8], '19.jpg': [0, 0.5], '23.jpg': [0.12, 0.5], '26.jpg': [0.5, 1] };
 const WEDDING_DATE = { year: 2027, month: 1, day: 30 };
 const SITE_URL = 'https://wedding.storyofus.cloud/';
 const warnings = [];
@@ -74,7 +76,15 @@ async function buildGallery() {
   for (const [index, file] of files.entries()) {
     const name = `${String(index + 1).padStart(2, '0')}.webp`;
     const image = sharp(file).rotate();
-    await image.clone()
+    let thumb = image.clone();
+    const focus = THUMB_FOCUS[path.basename(file)];
+    if (focus) {
+      const { width, height, orientation } = await image.metadata();
+      const [w, h] = orientation >= 5 ? [height, width] : [width, height];
+      const size = Math.min(w, h);
+      thumb = thumb.extract({ left: Math.round((w - size) * focus[0]), top: Math.round((h - size) * focus[1]), width: size, height: size });
+    }
+    await thumb
       .resize({ width: 480, height: 480, fit: 'cover', position: sharp.strategy.attention })
       .webp({ quality: 82 })
       .toFile(path.join(DIST, 'photos', 'gallery', 'thumb', name));

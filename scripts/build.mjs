@@ -10,8 +10,17 @@ const PHOTOS = path.join(ROOT, 'assets', 'photos');
 const IMAGE_FILE = /\.(jpe?g|png|webp|avif|tiff?)$/i;
 const SEASONS = ['winter', 'spring', 'summer', 'autumn'];
 const GALLERY_PREVIEW_COUNT = 12;
-// 작은 네모 사진에서 두 사람이 잘리는 사진만 보일 자리를 정해 둔다(가로·세로 0~1, 0은 왼쪽·위 끝, 1은 오른쪽·아래 끝)
-const THUMB_FOCUS = { '6.jpg': [0.5, 1], '9.jpg': [0.5, 0.8], '13.jpg': [0.45, 0.5], '19.jpg': [0, 0.5], '23.jpg': [0.12, 0.5], '26.jpg': [0.5, 1] };
+// 갤러리 작은 네모 사진을 자를 자리. 사진마다 인물이 가운데 오고 배경이 살게 직접 보고 정했다: [가운데 가로, 가운데 세로, 크기]
+// 가로·세로는 0~1(0은 왼쪽·위 끝, 1은 오른쪽·아래 끝), 크기는 사진의 짧은 쪽에 대한 비율(1이면 짧은 쪽 전체). 여기 없는 사진은 자동으로 자른다
+const THUMB_CROP = {
+  '0.jpg': [0.5, 0.67, 1], '1.jpg': [0.5, 0.53, 1], '2.jpg': [0.5, 0.48, 1], '3.jpg': [0.5, 0.53, 1],
+  '4.jpg': [0.43, 0.66, 0.8], '5.jpg': [0.53, 0.62, 0.8], '6.jpg': [0.56, 0.7, 0.8], '7.jpg': [0.53, 0.75, 0.75],
+  '8.jpg': [0.5, 0.63, 1], '9.jpg': [0.5, 0.7, 0.75], '10.jpg': [0.5, 0.46, 1], '11.jpg': [0.5, 0.63, 1],
+  '12.jpg': [0.57, 0.5, 1], '13.jpg': [0.49, 0.5, 1], '14.jpg': [0.62, 0.6, 0.8], '15.jpg': [0.5, 0.67, 1],
+  '16.jpg': [0.5, 0.5, 1], '17.jpg': [0.5, 0.55, 1], '18.jpg': [0.5, 0.56, 1], '19.jpg': [0.36, 0.5, 1],
+  '20.jpg': [0.55, 0.48, 0.85], '21.jpg': [0.55, 0.62, 0.7], '22.jpg': [0.4, 0.56, 0.8], '23.jpg': [0.45, 0.5, 1],
+  '24.jpg': [0.5, 0.55, 0.85], '25.jpg': [0.56, 0.5, 1], '26.jpg': [0.5, 0.67, 1],
+};
 const WEDDING_DATE = { year: 2027, month: 1, day: 30 };
 const SITE_URL = 'https://wedding.storyofus.cloud/';
 const warnings = [];
@@ -77,12 +86,15 @@ async function buildGallery() {
     const name = `${String(index + 1).padStart(2, '0')}.webp`;
     const image = sharp(file).rotate();
     let thumb = image.clone();
-    const focus = THUMB_FOCUS[path.basename(file)];
-    if (focus) {
+    const crop = THUMB_CROP[path.basename(file)];
+    if (crop) {
       const { width, height, orientation } = await image.metadata();
       const [w, h] = orientation >= 5 ? [height, width] : [width, height];
-      const size = Math.min(w, h);
-      thumb = thumb.extract({ left: Math.round((w - size) * focus[0]), top: Math.round((h - size) * focus[1]), width: size, height: size });
+      const [centerX, centerY, scale] = crop;
+      const size = Math.round(Math.min(w, h) * scale);
+      // 사진 밖으로 나가지 않게 가장자리에서 멈춘다
+      const start = (center, length) => Math.min(Math.max(Math.round(center * length - size / 2), 0), length - size);
+      thumb = thumb.extract({ left: start(centerX, w), top: start(centerY, h), width: size, height: size });
     }
     await thumb
       .resize({ width: 480, height: 480, fit: 'cover', position: sharp.strategy.attention })

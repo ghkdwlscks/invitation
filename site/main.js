@@ -146,16 +146,7 @@
   tick();
 
   /* 갤러리와 사진 뷰어 */
-  const galleryGrid = $('#galleryGrid');
-  const galleryMore = $('#galleryMore');
-  const galleryItems = $$('.gallery-item', galleryGrid);
-  if ($('.is-extra', galleryGrid)) {
-    galleryMore.hidden = false;
-    galleryMore.addEventListener('click', () => {
-      galleryGrid.classList.add('is-expanded');
-      galleryMore.hidden = true;
-    });
-  }
+  const galleryItems = $$('.gallery-item', $('#galleryGrid'));
 
   const viewer = $('#viewer');
   const viewerTrack = $('#viewerTrack');

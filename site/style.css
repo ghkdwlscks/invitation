@@ -940,20 +940,6 @@ html.js .fourcut-hero.is-printing .print-stack {
   height: 100%;
   object-fit: cover;
 }
-html.js .gallery-grid:not(.is-expanded) .is-extra {
-  display: none;
-}
-.gallery-more {
-  display: block;
-  width: 100%;
-  min-height: 42px;
-  margin-top: 14px;
-  border: 1px solid #c3b9af;
-  background: transparent;
-  color: #3e4843;
-  font-size: 12.5px;
-  cursor: pointer;
-}
 
 .invite-footer {
   padding: 24px 10px 30px;

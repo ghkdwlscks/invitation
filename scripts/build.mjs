@@ -9,7 +9,6 @@ const DIST = path.join(ROOT, 'dist');
 const PHOTOS = path.join(ROOT, 'assets', 'photos');
 const IMAGE_FILE = /\.(jpe?g|png|webp|avif|tiff?)$/i;
 const SEASONS = ['winter', 'spring', 'summer', 'autumn'];
-const GALLERY_PREVIEW_COUNT = 12;
 // 갤러리는 사진을 자르지 않고 줄마다 높이를 맞춰 채운다. 한 줄에 놓이는 사진들의 가로÷세로 합이 이 값에 가깝게(세로 사진 3장쯤)
 const ROW_RATIO = 2.2;
 const WEDDING_DATE = { year: 2027, month: 1, day: 30 };
@@ -90,10 +89,7 @@ async function buildGallery() {
     items.push({ ratio, markup: `<button type="button" class="gallery-item" style="--ratio: ${ratio.toFixed(3)}" data-full="photos/gallery/full/${name}" aria-label="사진 ${index + 1} 크게 보기">`
       + `<img src="photos/gallery/thumb/${name}" alt="" width="${thumb.width}" height="${thumb.height}" loading="lazy" decoding="async"></button>` });
   }
-  // 처음 보이는 사진과 '더 보기' 뒤 사진은 따로 줄을 나눠, 더 보기 전에도 줄이 꽉 차게
-  return [[items.slice(0, GALLERY_PREVIEW_COUNT), ''], [items.slice(GALLERY_PREVIEW_COUNT), ' is-extra']]
-    .flatMap(([part, extra]) => galleryRows(part).map(row => `<li class="gallery-row${extra}">${row.map(item => item.markup).join('')}</li>`))
-    .join('\n        ');
+  return galleryRows(items).map(row => `<li class="gallery-row">${row.map(item => item.markup).join('')}</li>`).join('\n        ');
 }
 
 // 순서는 그대로 두고, 줄마다 사진 비율 합이 ROW_RATIO에 가장 가깝게 나눈다(한 줄에 최대 4장)

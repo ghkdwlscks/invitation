@@ -915,15 +915,20 @@ html.js .fourcut-hero.is-printing .print-stack {
   background: var(--paper-soft);
   background-image: var(--paper-grain);
 }
+/* 사진을 자르지 않고, 한 줄 안에서는 사진 높이가 같게 너비를 나눈다 */
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.gallery-row {
+  display: flex;
   gap: 4px;
 }
 .gallery-item {
   display: block;
-  width: 100%;
-  aspect-ratio: 1;
+  flex: var(--ratio) 1 0;
+  min-width: 0;
+  aspect-ratio: var(--ratio);
   padding: 0;
   overflow: hidden;
   border: 0;

@@ -10,17 +10,8 @@ const PHOTOS = path.join(ROOT, 'assets', 'photos');
 const IMAGE_FILE = /\.(jpe?g|png|webp|avif|tiff?)$/i;
 const SEASONS = ['winter', 'spring', 'summer', 'autumn'];
 const GALLERY_PREVIEW_COUNT = 12;
-// 갤러리 작은 네모 사진을 자를 자리. 사진마다 직접 보고 사람이 잘리지 않고 배경 포인트(지붕·하늘·꽃·기와 등)가 살게 정했다
-// [네모의 가운데 가로, 가운데 세로], 0~1(0은 왼쪽·위 끝, 1은 오른쪽·아래 끝). 네모는 늘 사진의 짧은 쪽 전체 크기. 여기 없는 사진은 자동으로 자른다
-const THUMB_CROP = {
-  '0.jpg': [0.5, 0.667], '1.jpg': [0.5, 0.533], '2.jpg': [0.5, 0.562], '3.jpg': [0.5, 0.523],
-  '4.jpg': [0.5, 0.558], '5.jpg': [0.5, 0.57], '6.jpg': [0.5, 0.572], '7.jpg': [0.5, 0.667],
-  '8.jpg': [0.5, 0.65], '9.jpg': [0.5, 0.578], '10.jpg': [0.5, 0.46], '11.jpg': [0.5, 0.567],
-  '12.jpg': [0.57, 0.5], '13.jpg': [0.49, 0.5], '14.jpg': [0.62, 0.5], '15.jpg': [0.5, 0.64],
-  '16.jpg': [0.5, 0.5], '17.jpg': [0.5, 0.55], '18.jpg': [0.5, 0.56], '19.jpg': [0.4, 0.5],
-  '20.jpg': [0.5, 0.433], '21.jpg': [0.55, 0.5], '22.jpg': [0.42, 0.5], '23.jpg': [0.405, 0.5],
-  '24.jpg': [0.5, 0.5], '25.jpg': [0.56, 0.5], '26.jpg': [0.5, 0.64],
-};
+// 갤러리는 사진을 자르지 않고 줄마다 높이를 맞춰 채운다. 한 줄에 놓이는 사진들의 가로÷세로 합이 이 값에 가깝게(세로 사진 3장쯤)
+const ROW_RATIO = 2.2;
 const WEDDING_DATE = { year: 2027, month: 1, day: 30 };
 const SITE_URL = 'https://wedding.storyofus.cloud/';
 const warnings = [];
@@ -85,19 +76,9 @@ async function buildGallery() {
   for (const [index, file] of files.entries()) {
     const name = `${String(index + 1).padStart(2, '0')}.webp`;
     const image = sharp(file).rotate();
-    let thumb = image.clone();
-    const crop = THUMB_CROP[path.basename(file)];
-    if (crop) {
-      const { width, height, orientation } = await image.metadata();
-      const [w, h] = orientation >= 5 ? [height, width] : [width, height];
-      const [centerX, centerY] = crop;
-      const size = Math.min(w, h);
-      // 사진 밖으로 나가지 않게 가장자리에서 멈춘다
-      const start = (center, length) => Math.min(Math.max(Math.round(center * length - size / 2), 0), length - size);
-      thumb = thumb.extract({ left: start(centerX, w), top: start(centerY, h), width: size, height: size });
-    }
-    await thumb
-      .resize({ width: 480, height: 480, fit: 'cover', position: sharp.strategy.attention })
+    // 작은 사진도 자르지 않고 사진 모양 그대로
+    const thumb = await image.clone()
+      .resize({ width: 1080, height: 720, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 82 })
       .toFile(path.join(DIST, 'photos', 'gallery', 'thumb', name));
     // 크게 보기도 휴대폰 화면에 맞는 크기(긴 쪽 2000)로
@@ -105,11 +86,32 @@ async function buildGallery() {
       .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 82 })
       .toFile(path.join(DIST, 'photos', 'gallery', 'full', name));
-    const extra = index >= GALLERY_PREVIEW_COUNT ? ' class="is-extra"' : '';
-    items.push(`<li${extra}><button type="button" class="gallery-item" data-full="photos/gallery/full/${name}" aria-label="사진 ${index + 1} 크게 보기">`
-      + `<img src="photos/gallery/thumb/${name}" alt="" width="480" height="480" loading="lazy" decoding="async"></button></li>`);
+    const ratio = thumb.width / thumb.height;
+    items.push({ ratio, markup: `<button type="button" class="gallery-item" style="--ratio: ${ratio.toFixed(3)}" data-full="photos/gallery/full/${name}" aria-label="사진 ${index + 1} 크게 보기">`
+      + `<img src="photos/gallery/thumb/${name}" alt="" width="${thumb.width}" height="${thumb.height}" loading="lazy" decoding="async"></button>` });
   }
-  return items.join('\n        ');
+  // 처음 보이는 사진과 '더 보기' 뒤 사진은 따로 줄을 나눠, 더 보기 전에도 줄이 꽉 차게
+  return [[items.slice(0, GALLERY_PREVIEW_COUNT), ''], [items.slice(GALLERY_PREVIEW_COUNT), ' is-extra']]
+    .flatMap(([part, extra]) => galleryRows(part).map(row => `<li class="gallery-row${extra}">${row.map(item => item.markup).join('')}</li>`))
+    .join('\n        ');
+}
+
+// 순서는 그대로 두고, 줄마다 사진 비율 합이 ROW_RATIO에 가장 가깝게 나눈다(한 줄에 최대 4장)
+function galleryRows(items) {
+  const cost = [0];
+  const rowStart = [0];
+  for (let end = 1; end <= items.length; end += 1) {
+    cost[end] = Infinity;
+    let sum = 0;
+    for (let start = end - 1; start >= 0 && end - start <= 4; start -= 1) {
+      sum += items[start].ratio;
+      const total = cost[start] + (sum - ROW_RATIO) ** 2;
+      if (total < cost[end]) { cost[end] = total; rowStart[end] = start; }
+    }
+  }
+  const rows = [];
+  for (let end = items.length; end > 0; end = rowStart[end]) rows.unshift(items.slice(rowStart[end], end));
+  return rows;
 }
 
 async function buildShareImage() {

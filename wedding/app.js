@@ -32,6 +32,7 @@
   const status = $('#status-pill');
   const coupleBubble = $('#couple-message');
   const resultDialog = $('#result-dialog');
+  const prizeForm = $('#prize-form');
   const entryDialog = $('#entry-card');
   const guestbookBoard = $('#guestbook-board');
   const guestbookFeed = $('#guestbook-feed');
@@ -56,6 +57,7 @@
   let cameraFollow = true;
   let guestsLoaded = false;
   let claiming = false;
+  let editingContact = false;
   let toastTimer;
   let focusBeforeDialog;
   let launchGameAfterResult = false;
@@ -399,6 +401,7 @@
     document.body.classList.toggle('has-hall-tabs', Boolean(guest.seat));
     guestbookBoard.hidden = !guest.seat;
     status.hidden = Boolean(guest.seat);
+    renderPrize();
     setPlayerAvatar();
     if (guest.seat) {
       seats.forEach(item => item.element.classList.remove('nearby', 'is-target'));
@@ -621,9 +624,10 @@
     $('#result-seat').textContent = `${guest.name}님의 자리`;
     $('#result-title').textContent = won ? '오늘의 행운이 찾아왔어요!' : '함께해 주셔서 고마워요';
     $('#result-description').textContent = won
-      ? '축하해요! 오늘의 작은 선물 주인공이 되셨어요.\n예시 선물로 커피 한 잔을 준비했어요.'
+      ? '축하해요! 오늘의 작은 선물 주인공이 되셨어요.\n번호를 남겨 주시면 커피 쿠폰을 보내 드릴게요.'
       : '따뜻한 축하의 마음을 남겨주셔서 고마워요.\n오늘 이 자리를 함께 빛내주셨네요.';
     $('#result-stamp').textContent = won ? 'COFFEE FOR YOU' : 'THANK YOU, ALWAYS';
+    renderPrize();
     $('#confetti').replaceChildren();
     openDialog(resultDialog);
     if (won && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -635,6 +639,22 @@
         $('#confetti').append(piece);
       }
     }
+  }
+
+  // 당첨 하객: 번호를 남기기 전에는 번호 칸과 예식장 위 안내를, 남긴 뒤에는 가린 번호를 보여 준다
+  function renderPrize() {
+    const won = Boolean(guest.won);
+    prizeForm.hidden = !won || (Boolean(guest.contact) && !editingContact);
+    $('#prize-done').hidden = !won || !guest.contact || editingContact;
+    $('#prize-saved').textContent = guest.contact ? `${guest.contact} 번호로 커피 쿠폰을 보내 드릴게요.` : '';
+    $('#prize-reminder').hidden = !won || !guest.seat || Boolean(guest.contact);
+    $('#prize-error').hidden = true;
+  }
+
+  // 휴대폰 번호만 받고 010-1234-5678 꼴로 맞춘다. 아니면 빈 문자열(server/apps-script.gs와 같은 규칙)
+  function phoneNumber(value) {
+    const digits = String(value || '').replace(/\D/g, '');
+    return /^(010\d{8}|01[16789]\d{7,8})$/.test(digits) ? digits.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3') : '';
   }
 
   function toast(message) {
@@ -841,6 +861,35 @@
     else location.href = '../';
   });
   $('#guestbook-tab').addEventListener('click', () => guestbookBoard.scrollIntoView({behavior: 'smooth', block: 'start'}));
+  prizeForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const submit = $('#prize-submit');
+    const error = $('#prize-error');
+    if (submit.disabled) return;
+    const phone = phoneNumber($('#prize-phone').value);
+    error.hidden = Boolean(phone);
+    if (!phone) { error.textContent = '휴대폰 번호를 다시 확인해 주세요.'; return; }
+    submit.disabled = true;
+    try {
+      await STORE.saveContact({guestId: guest.guestId, phone});
+      // 이 기기에는 가운데를 가린 번호만 남긴다
+      guest.contact = phone.replace(/-\d+-/, '-****-');
+      editingContact = false;
+      $('#prize-phone').value = '';
+      saveGuest();
+      renderPrize();
+    } catch (_) {
+      error.textContent = '연결이 잠시 불안정해요. 다시 눌러 주세요.';
+      error.hidden = false;
+    }
+    submit.disabled = false;
+  });
+  $('#prize-edit').addEventListener('click', () => {
+    editingContact = true;
+    renderPrize();
+    $('#prize-phone').focus();
+  });
+  $('#prize-reminder').addEventListener('click', showResult);
   $('#mini-game-button').addEventListener('click', () => {
     launchGameAfterResult = true;
     window.WEDDING_BACK.back();
@@ -859,6 +908,7 @@
     });
   }
   resultDialog.addEventListener('close', () => {
+    editingContact = false;
     if (!launchGameAfterResult) return;
     launchGameAfterResult = false;
     window.HONEYMOON_GAME.open(guest);

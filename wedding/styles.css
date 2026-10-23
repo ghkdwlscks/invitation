@@ -821,6 +821,27 @@ dialog.entry-card .guestbook-fields textarea {
   color: #7f9bab;
   font-size: 11px;
 }
+.garden-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+/* 당첨됐는데 쿠폰 받을 번호를 아직 안 남긴 하객에게만 보인다 */
+.prize-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin: 9px 0 0;
+  padding: 8px 11px;
+  border: 1px dashed #e3a6b8;
+  border-radius: 6px;
+  background: #fff4f7;
+  color: #c47790;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+}
 .venue {
   position: relative;
   isolation: isolate;
@@ -1561,6 +1582,93 @@ dialog h2[tabindex='-1']:focus {
   color: #7392a2;
   font-size: 11px;
   line-height: 1.8;
+}
+/* 당첨 창: 쿠폰 받을 휴대폰 번호 */
+.prize-form,
+.prize-done {
+  margin: 16px 0 0;
+  border: 1px solid #f0c9d4;
+  border-radius: 6px;
+  background: #fff7f9;
+  word-break: keep-all;
+}
+.prize-form {
+  padding: 12px 12px 10px;
+  text-align: left;
+}
+.prize-label {
+  display: block;
+  margin: 0 0 6px;
+  color: #c47790;
+  font-size: 11px;
+  font-weight: 800;
+}
+.prize-row {
+  display: flex;
+  gap: 6px;
+}
+.prize-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid #bfd5df;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.prize-row input::placeholder {
+  color: #a1b1b9;
+}
+.prize-row button {
+  flex: none;
+  padding: 0 14px;
+  border: 2px solid #d98469;
+  border-radius: 6px;
+  background: #f29b7d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 2px 2px 0 #f8d1b7;
+}
+.prize-row button:disabled {
+  opacity: 0.6;
+}
+.result-top .prize-note,
+.result-top .prize-error {
+  margin: 7px 0 0;
+  color: #8a7782;
+  font-size: 10px;
+  line-height: 1.6;
+  white-space: normal;
+}
+.result-top .prize-error {
+  color: #d0607a;
+  font-weight: 700;
+}
+.prize-done {
+  padding: 11px 12px;
+  color: #7392a2;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.prize-done b,
+.prize-done span {
+  display: block;
+}
+.prize-done b {
+  color: #c47790;
+  font-size: 12px;
+}
+.prize-done button {
+  margin-top: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8a9fab;
+  font-size: 10px;
+  text-decoration: underline;
 }
 .ticket-divider {
   height: 1px;

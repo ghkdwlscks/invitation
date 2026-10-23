@@ -601,7 +601,7 @@
     const request = ++rankingRequest;
     if (!rankingsForMode().length) ranking.innerHTML = '<li class="is-loading"><span>순위를 불러오는 중…</span></li>';
     try {
-      const list = await window.WEDDING_STORE.loadRanking(mode);
+      const list = await window.WEDDING_STORE.loadRanking(mode, state.guestId);
       if (request !== rankingRequest || mode !== state.mode) return;
       rankingEntries[mode] = list;
       renderRankings();
@@ -619,13 +619,13 @@
     }
     // 1~5위 자리는 늘 보여 주고, 내 기록이 그 밖이면 맨 아래에 덧붙인다
     const rows = Array.from({length: 5}, (_, index) => entries[index] || {empty: true, index});
-    const currentIndex = entries.findIndex(item => item.id && item.id === state.guestId);
+    const currentIndex = entries.findIndex(item => item.mine);
     if (currentIndex >= 5) rows.push(entries[currentIndex]);
     rows.forEach(item => {
       const index = item.empty ? item.index : entries.indexOf(item);
       const row = document.createElement('li');
       if (item.empty) row.className = 'is-vacant';
-      else if (item.id && item.id === state.guestId) row.className = 'is-current';
+      else if (item.mine) row.className = 'is-current';
       const person = document.createElement('span');
       person.textContent = item.empty ? `${index + 1}위  -` : `${index + 1}위  ${item.name}`;
       const score = document.createElement('span');
@@ -641,9 +641,8 @@
       await window.WEDDING_STORE.saveScore(mode, run);
       if (state.mode !== mode || state.phase !== 'over') return;
       // 순위에는 하객마다 가장 높은 점수 하나만 오른다
-      const id = run.guestId;
       await refreshRankings();
-      const rank = rankingsForMode().findIndex(item => item.id === id) + 1;
+      const rank = rankingsForMode().findIndex(item => item.mine) + 1;
       if (state.mode === mode && state.phase === 'over') rankLabel.textContent = rank ? `${rank}위` : '-';
     } catch (_) {
       if (state.mode === mode && state.phase === 'over') rankLabel.textContent = '잠시 후 반영';

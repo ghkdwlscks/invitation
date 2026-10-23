@@ -206,6 +206,10 @@
             <span class="tiny-label">WELCOME, FRIEND!</span>
             <h2 id="garden-title">내 미니미의 행운 자리를 골라 주세요</h2>
             <p class="garden-note">미니미가 앉는 온라인 자리예요.</p>
+            <button class="prize-reminder" id="prize-reminder" type="button" hidden>
+              <span>★ 당첨 선물 · 쿠폰 받을 번호를 남겨 주세요</span>
+              <span aria-hidden="true">›</span>
+            </button>
           </div>
         </div>
         <div class="venue" id="venue" aria-label="192석이 있는 온라인 예식장">
@@ -290,6 +294,28 @@
         <span class="result-seat" id="result-seat"></span>
         <h2 id="result-title" tabindex="-1" autofocus></h2>
         <p id="result-description"></p>
+        <form class="prize-form" id="prize-form" novalidate hidden>
+          <label class="prize-label" for="prize-phone">☕ 쿠폰 받으실 휴대폰 번호</label>
+          <div class="prize-row">
+            <input
+              id="prize-phone"
+              name="phone"
+              type="tel"
+              inputmode="numeric"
+              maxlength="13"
+              placeholder="010-0000-0000"
+              autocomplete="tel"
+            />
+            <button id="prize-submit" type="submit">남기기</button>
+          </div>
+          <p class="prize-error" id="prize-error" role="alert" hidden></p>
+          <p class="prize-note">쿠폰을 보내 드리는 데만 쓰고, 보낸 뒤 바로 지울게요. 다른 하객에게는 보이지 않아요.</p>
+        </form>
+        <div class="prize-done" id="prize-done" hidden>
+          <b>✓ 번호를 받았어요</b>
+          <span id="prize-saved"></span>
+          <button id="prize-edit" type="button">번호 고치기</button>
+        </div>
       </div>
       <div class="ticket-divider" aria-hidden="true"></div>
       <div class="result-bottom">

@@ -30,8 +30,11 @@
     loadGuests: async () => (await call('loadGuests')).guests,
     claimSeat: payload => call('claimSeat', payload),
     updateAvatar: payload => call('updateAvatar', payload),
+    // 당첨 하객의 쿠폰 받을 번호: 두 분만 보는 시트에만 남는다
+    saveContact: payload => call('saveContact', payload),
     saveScore: (game, payload) => call('saveScore', {game, ...payload}),
-    loadRanking: async game => (await call('loadRanking', {game})).ranking.filter(item => isRealName(item.name)),
+    // 순위에는 다른 하객의 guestId가 오지 않고, 내 기록에만 mine이 붙어 온다
+    loadRanking: async (game, guestId) => (await call('loadRanking', {game, guestId})).ranking.filter(item => isRealName(item.name)),
     // 두 분 확인용: Apps Script의 ADMIN_KEY가 있어야 한다
     loadWinners: key => call('loadWinners', {key})
   };
@@ -116,6 +119,13 @@
       writeDb(db);
       return {ok: true};
     },
+    // 체험용이라 번호는 어디에도 남기지 않고, 당첨 자리인지만 본다
+    async saveContact({guestId}) {
+      await wait(400, 800);
+      const mine = readDb().guests.find(item => item.guestId && item.guestId === guestId);
+      if (!mine || !DEMO_WINNING_SEATS.includes(mine.seat)) throw new Error('당첨된 자리에서만 남길 수 있어요');
+      return {ok: true};
+    },
     async saveScore(game, {guestId, name, score}) {
       await wait(250, 500);
       const db = readDb();
@@ -123,9 +133,9 @@
       writeDb(db);
       return {id: guestId};
     },
-    async loadRanking(game) {
+    async loadRanking(game, guestId) {
       await wait(250, 500);
-      return clone(bestPerPlayer(readDb().scores[game] || []));
+      return clone(bestPerPlayer(readDb().scores[game] || []).map(({id, ...item}) => ({...item, mine: Boolean(guestId) && id === guestId})));
     },
     /** 두 분 확인용: 당첨 자리와 거기 앉은 하객 [{seat, guest|null}] */
     async loadWinners() {

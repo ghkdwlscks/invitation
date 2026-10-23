@@ -1895,6 +1895,7 @@ dialog h2[tabindex='-1']:focus {
   color: #7896a0;
   font-size: 9px;
   text-align: center;
+  word-break: keep-all;
 }
 .game-play {
   padding: 14px 16px 18px;

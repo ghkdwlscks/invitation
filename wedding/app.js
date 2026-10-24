@@ -39,10 +39,12 @@
   const seats = [];
   const occupied = new Map();
   const keys = new Set();
-  // 두 분 전용 주소(wedding/?game): 하객 등록·착석 없이 신혼여행 게임만 한다. 이 기기의 하객 기록은 쓰지 않고, 점수는 하객 순위에 올리지 않는다
-  const COUPLE = new URLSearchParams(location.search).has('game');
-  const COUPLE_PLAYER = {name: '신랑신부', guestId: 'couple', unranked: true};
-  let guest = COUPLE ? null : readGuest();
+  // 두 분 전용 주소(wedding/?jinchan-gahyun): 앉는 단계만 건너뛰고 앉은 하객 화면을 그대로 쓴다(자리·미니미 없이).
+  // 이 기기에 저장된 하객 기록은 쓰지도 덮어쓰지도 않고, 게임 점수는 하객 순위에 올리지 않는다
+  const COUPLE = new URLSearchParams(location.search).has('jinchan-gahyun');
+  let guest = COUPLE ? {guestId: 'couple', name: '신랑신부', message: '', avatar: MINIMI.normalize(), seat: null, unranked: true} : readGuest();
+  // 앉은 하객 화면인지: 자리에 앉았거나 두 분 주소로 들어왔을 때
+  const seated = () => COUPLE || Boolean(guest?.seat);
   let avatarDraft = MINIMI.normalize();
   let position = {x: WORLD_WIDTH / 2, y: WORLD_HEIGHT - 55};
   let stick = {x: 0, y: 0};
@@ -248,6 +250,7 @@
   }
 
   function saveGuest() {
+    if (COUPLE) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(guest)); } catch (_) { /* 저장하지 못해도 화면은 그대로 동작한다. */ }
   }
 
@@ -328,7 +331,7 @@
       if (seat) renderSeat(seat);
     });
     if (walkTarget && occupied.has(walkTarget.id)) stopWalking();
-    if (changed.length && guest?.seat) renderGuestbookBoard();
+    if (changed.length && seated()) renderGuestbookBoard();
     renderCounts();
   }
 
@@ -374,7 +377,7 @@
     $('#bubble-message').textContent = owner.message;
     bubble.style.left = `${Math.max(112, Math.min(WORLD_WIDTH - 112, seat.x))}px`;
     bubble.style.top = `${seat.y - 47}px`;
-    if (guest?.seat) {
+    if (seated()) {
       guestbookFeed.querySelectorAll('.is-active').forEach(entry => entry.classList.remove('is-active'));
       const entry = guestbookFeed.querySelector(`[data-seat="${seat.id}"]`);
       if (entry) {
@@ -386,7 +389,7 @@
 
   function setPlayerAvatar() {
     playerElement.innerHTML = MINIMI.render(guest.avatar);
-    playerElement.hidden = Boolean(guest.seat);
+    playerElement.hidden = seated();
   }
 
   function enterVenue() {
@@ -397,37 +400,28 @@
     $('#venue-shade').hidden = true;
     $('#game-hud').hidden = false;
     venue.classList.add('is-active');
-    venue.classList.toggle('is-seated', Boolean(guest.seat));
-    $('#game-controls').hidden = Boolean(guest.seat);
-    $('#seated-controls').hidden = !guest.seat;
-    $('#hall-tabs').hidden = !guest.seat;
-    document.body.classList.toggle('has-hall-tabs', Boolean(guest.seat));
-    guestbookBoard.hidden = !guest.seat;
-    status.hidden = Boolean(guest.seat);
+    venue.classList.toggle('is-seated', seated());
+    $('#game-controls').hidden = seated();
+    $('#seated-controls').hidden = !seated();
+    $('#hall-tabs').hidden = !seated();
+    document.body.classList.toggle('has-hall-tabs', seated());
+    guestbookBoard.hidden = !seated();
+    status.hidden = seated();
+    // 두 분은 자리도 미니미도 없다
+    $('#home-button').hidden = COUPLE;
+    $('#restyle-button').hidden = COUPLE;
     renderPrize();
     setPlayerAvatar();
-    if (guest.seat) {
+    if (seated()) {
       seats.forEach(item => item.element.classList.remove('nearby', 'is-target'));
       nearestSeat = null;
-      const seat = seats.find(item => item.id === guest.seat);
+      // 두 분은 단상과 앞줄이 보이게
+      const seat = seats.find(item => item.id === guest.seat) || {x: WORLD_WIDTH / 2, y: 360};
       position = {x: seat.x, y: seat.y};
       centerCameraOn(seat);
       renderGuestbookBoard();
     }
     updateScene();
-  }
-
-  // 두 분 전용 주소: 예식장은 바라보기만 하고, 오른쪽 탭은 청첩장으로·신혼여행 게임만 남긴 채 게임 창을 연다
-  function openCoupleHall() {
-    $('#venue-shade').hidden = true;
-    playerElement.hidden = true;
-    $('#restyle-button').hidden = true;
-    $('#guestbook-tab').hidden = true;
-    $('#hall-tabs').hidden = false;
-    document.body.classList.add('has-hall-tabs');
-    setCamera(venue.clientWidth / 2 - WORLD_WIDTH / 2, -60);
-    // 게임(minigames.js)은 이 파일 다음에 불러오므로 다 불러온 뒤에 연다
-    document.addEventListener('DOMContentLoaded', () => window.HONEYMOON_GAME.open(COUPLE_PLAYER), {once: true});
   }
 
   function placePlayer() {
@@ -437,7 +431,7 @@
 
   function updateScene() {
     placePlayer();
-    if (!guest?.seat && cameraFollow) {
+    if (!seated() && cameraFollow) {
       centerCameraOn(position);
     } else {
       setCamera(cameraX, cameraY);
@@ -445,7 +439,7 @@
   }
 
   function followCamera(elapsed) {
-    if (guest?.seat || !cameraFollow) return;
+    if (seated() || !cameraFollow) return;
     const ease = 1 - Math.exp(-elapsed * 10);
     const targetX = venue.clientWidth / 2 - position.x * zoom;
     const targetY = venue.clientHeight * .43 - position.y * zoom;
@@ -544,7 +538,7 @@
 
   function updateNearest() {
     // 아직 입장 전이거나 이미 앉은 하객에게는 빈자리 선택 표시를 하지 않는다
-    if (!guest || guest.seat) {
+    if (!guest || seated()) {
       nearestSeat?.element.classList.remove('nearby');
       nearestSeat = null;
       return;
@@ -579,7 +573,7 @@
   function frame(time) {
     const elapsed = Math.min((time - (lastTime || time)) / 1000, .05);
     lastTime = time;
-    if (guest && !guest.seat && !claiming && !resultDialog.open) {
+    if (guest && !seated() && !claiming && !resultDialog.open) {
       const move = movementVector();
       if (move.x || move.y) {
         stopWalking();
@@ -742,7 +736,7 @@
   });
 
   joystick.addEventListener('pointerdown', event => {
-    if (!guest || guest.seat) return;
+    if (!guest || seated()) return;
     activePointer = event.pointerId;
     joystick.setPointerCapture(event.pointerId);
     updateStick(event);
@@ -785,7 +779,7 @@
     if (!pointerGesture || event.pointerId !== pointerGesture.id) return;
     const {moved, seatElement} = pointerGesture;
     pointerGesture = null;
-    if (moved || !seatElement || guest.seat || claiming) return;
+    if (moved || !seatElement || seated() || claiming) return;
     const seat = seats.find(item => item.element === seatElement);
     if (seat && !occupied.has(seat.id)) walkTo(seat);
   });
@@ -806,7 +800,7 @@
   // 아이폰 사파리가 예식장 안에서 두 손가락을 화면 전체 확대로 가져가지 않게
   venue.addEventListener('gesturestart', event => { if (guest) event.preventDefault(); });
   window.addEventListener('keydown', event => {
-    if (!guest || guest.seat || /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
+    if (!guest || seated() || /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(event.key)) { keys.add(event.key); event.preventDefault(); }
   });
   window.addEventListener('keyup', event => keys.delete(event.key));
@@ -814,7 +808,7 @@
   window.addEventListener('resize', updateScene);
 
   sitButton.addEventListener('click', async () => {
-    if (!guest || guest.seat || !nearestSeat || claiming) return;
+    if (!guest || seated() || !nearestSeat || claiming) return;
     const seat = nearestSeat;
     stopWalking();
     claiming = true;
@@ -869,7 +863,7 @@
     const seat = seats.find(item => item.id === guest?.seat);
     if (seat) centerCameraOn(seat);
   });
-  $('#honeymoon-button').addEventListener('click', () => window.HONEYMOON_GAME.open(COUPLE ? COUPLE_PLAYER : guest));
+  $('#honeymoon-button').addEventListener('click', () => window.HONEYMOON_GAME.open(guest));
   // 오른쪽 탭: 청첩장으로 돌아가기, 방명록으로 내려가기
   $('#invitation-tab').addEventListener('click', () => {
     const close = window.parent !== window && window.parent.document.querySelector('[data-close-layer]');
@@ -937,8 +931,7 @@
   refreshGuests().then(() => updateNearest());
   setInterval(refreshGuests, REFRESH_INTERVAL);
   document.querySelectorAll('[data-sound-toggle]').forEach(button => window.WEDDING_SOUND.bind(button));
-  if (COUPLE) openCoupleHall();
-  else if (guest) enterVenue();
+  if (guest) enterVenue();
   else {
     playerElement.hidden = true;
     document.body.classList.add('is-entering');

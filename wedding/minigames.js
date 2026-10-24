@@ -85,7 +85,7 @@
   };
 
   const state = {
-    name: '하객', guestId: '', mode: null, phase: 'menu', time: 0, distance: 0, speed: 0,
+    name: '하객', guestId: '', unranked: false, mode: null, phase: 'menu', time: 0, distance: 0, speed: 0,
     score: 0, cleared: 0, shells: 0, bonus: 0, completed: false,
     stage: 1, previousStage: 0, blendStart: 0, quietUntil: 0, spawnIn: 0, pendingSignature: null,
     obstacles: [], seed: 1,
@@ -637,6 +637,11 @@
 
   async function recordRun(mode, run) {
     const rankLabel = result.querySelector('#film-rank');
+    // 신랑·신부 기록은 이 기기의 '내 최고'에만 남기고 하객 순위에는 올리지 않는다
+    if (state.unranked) {
+      rankLabel.textContent = '순위 제외';
+      return;
+    }
     try {
       await window.WEDDING_STORE.saveScore(mode, run);
       if (state.mode !== mode || state.phase !== 'over') return;
@@ -701,6 +706,7 @@
     open(guest) {
       state.name = String(guest?.name || '하객').slice(0, 12);
       state.guestId = String(guest?.guestId || '');
+      state.unranked = Boolean(guest?.unranked);
       showPicker();
       dialog.showModal();
       document.body.classList.add('modal-open');

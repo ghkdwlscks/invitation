@@ -39,7 +39,10 @@
   const seats = [];
   const occupied = new Map();
   const keys = new Set();
-  let guest = readGuest();
+  // 두 분 전용 주소(wedding/?game): 하객 등록·착석 없이 신혼여행 게임만 한다. 이 기기의 하객 기록은 쓰지 않고, 점수는 하객 순위에 올리지 않는다
+  const COUPLE = new URLSearchParams(location.search).has('game');
+  const COUPLE_PLAYER = {name: '신랑신부', guestId: 'couple', unranked: true};
+  let guest = COUPLE ? null : readGuest();
   let avatarDraft = MINIMI.normalize();
   let position = {x: WORLD_WIDTH / 2, y: WORLD_HEIGHT - 55};
   let stick = {x: 0, y: 0};
@@ -412,6 +415,19 @@
       renderGuestbookBoard();
     }
     updateScene();
+  }
+
+  // 두 분 전용 주소: 예식장은 바라보기만 하고, 오른쪽 탭은 청첩장으로·신혼여행 게임만 남긴 채 게임 창을 연다
+  function openCoupleHall() {
+    $('#venue-shade').hidden = true;
+    playerElement.hidden = true;
+    $('#restyle-button').hidden = true;
+    $('#guestbook-tab').hidden = true;
+    $('#hall-tabs').hidden = false;
+    document.body.classList.add('has-hall-tabs');
+    setCamera(venue.clientWidth / 2 - WORLD_WIDTH / 2, -60);
+    // 게임(minigames.js)은 이 파일 다음에 불러오므로 다 불러온 뒤에 연다
+    document.addEventListener('DOMContentLoaded', () => window.HONEYMOON_GAME.open(COUPLE_PLAYER), {once: true});
   }
 
   function placePlayer() {
@@ -853,7 +869,7 @@
     const seat = seats.find(item => item.id === guest?.seat);
     if (seat) centerCameraOn(seat);
   });
-  $('#honeymoon-button').addEventListener('click', () => window.HONEYMOON_GAME.open(guest));
+  $('#honeymoon-button').addEventListener('click', () => window.HONEYMOON_GAME.open(COUPLE ? COUPLE_PLAYER : guest));
   // 오른쪽 탭: 청첩장으로 돌아가기, 방명록으로 내려가기
   $('#invitation-tab').addEventListener('click', () => {
     const close = window.parent !== window && window.parent.document.querySelector('[data-close-layer]');
@@ -921,7 +937,8 @@
   refreshGuests().then(() => updateNearest());
   setInterval(refreshGuests, REFRESH_INTERVAL);
   document.querySelectorAll('[data-sound-toggle]').forEach(button => window.WEDDING_SOUND.bind(button));
-  if (guest) enterVenue();
+  if (COUPLE) openCoupleHall();
+  else if (guest) enterVenue();
   else {
     playerElement.hidden = true;
     document.body.classList.add('is-entering');

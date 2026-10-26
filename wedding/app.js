@@ -710,6 +710,13 @@
   }
 
   entryDialog.addEventListener('close', () => {
+    // 입장하기 전에 휴대폰 뒤로가기로 닫혔으면: 입장 창은 다시 띄워 두고 청첩장으로 나간다
+    if (!guest) {
+      entryDialog.showModal();
+      $('#entry-title').focus({preventScroll: true});
+      $('#invitation-tab').click();
+      return;
+    }
     if (!restyling) return;
     restyling = false;
     entryDialog.classList.remove('is-restyle');
@@ -905,6 +912,8 @@
     window.WEDDING_BACK.back();
   });
   entryDialog.addEventListener('cancel', event => {
+    // 입장하기 전에는 닫히게 둔다(위 close에서 청첩장으로 나간다)
+    if (!guest) return;
     event.preventDefault();
     if (restyling) window.WEDDING_BACK.back();
   });

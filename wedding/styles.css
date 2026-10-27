@@ -18,6 +18,7 @@
 .character {
   image-rendering: pixelated;
   shape-rendering: crispEdges;
+  -webkit-touch-callout: none;
 }
 html {
   scroll-behavior: smooth;

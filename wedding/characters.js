@@ -454,5 +454,17 @@
     return `<svg class="character" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true">${toSvg(c)}</svg>`;
   }
 
-  window.MINIMI = {hairs, colors, skins, accessories, groupOf, normalize, render};
+  // 예식장 자리·방명록처럼 미니미를 많이 띄우는 곳은 그림 한 장(img)으로 넣는다.
+  // 칸마다 사각형 수백 개인 SVG를 그대로 넣으면 하객이 많을 때 화면이 버벅인다. 같은 차림은 한 번만 만든다
+  const images = new Map();
+  function image(value = {}) {
+    const key = JSON.stringify(normalize(value));
+    if (!images.has(key)) {
+      const svg = render(value).replace(' aria-hidden="true"', '');
+      images.set(key, `<img class="character" src="data:image/svg+xml,${encodeURIComponent(svg)}" alt="" aria-hidden="true" draggable="false">`);
+    }
+    return images.get(key);
+  }
+
+  window.MINIMI = {hairs, colors, skins, accessories, groupOf, normalize, render, image};
 })();

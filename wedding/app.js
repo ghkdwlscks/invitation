@@ -288,7 +288,7 @@
       button.type = 'button';
       button.className = 'guest-on-seat';
       button.setAttribute('aria-label', `${owner.name}님의 방명록 보기`);
-      button.innerHTML = `${chair}${MINIMI.render(owner.avatar)}<span class="guest-name"></span>`;
+      button.innerHTML = `${chair}${MINIMI.image(owner.avatar)}<span class="guest-name"></span>`;
       button.querySelector('.guest-name').textContent = owner.name;
       button.addEventListener('click', event => {
         event.stopPropagation();
@@ -357,7 +357,7 @@
       entry.dataset.seat = seat.id;
       if (seat.id === guest?.seat) entry.classList.add('is-mine');
       entry.setAttribute('aria-label', `${owner.name}님의 축하 메시지와 자리 보기`);
-      entry.innerHTML = `<span class="guestbook-entry-avatar" aria-hidden="true">${MINIMI.render(owner.avatar)}</span>`
+      entry.innerHTML = `<span class="guestbook-entry-avatar" aria-hidden="true">${MINIMI.image(owner.avatar)}</span>`
         + '<span class="guestbook-entry-copy"><strong></strong><span></span></span>';
       entry.querySelector('strong').textContent = owner.name;
       entry.querySelector('.guestbook-entry-copy span').textContent = owner.message;
@@ -798,6 +798,8 @@
       if (pointerGesture?.id === event.pointerId) pointerGesture = null;
     });
   }
+  // 미니미·예식장 그림을 길게 눌러도 휴대폰의 '이미지 저장' 메뉴가 뜨지 않게
+  for (const element of [venue, guestbookFeed]) element.addEventListener('contextmenu', event => event.preventDefault());
   // 노트북 터치패드에서 두 손가락 벌리기·오므리기(Ctrl+휠로 들어온다), Ctrl+마우스 휠
   venue.addEventListener('wheel', event => {
     if (!guest || !event.ctrlKey) return;

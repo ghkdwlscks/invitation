@@ -25,6 +25,7 @@
     // 창을 열기 전에 보던 곳으로 돌아간다
     window.scrollTo(0, layer.scrollY);
     if (layer.element === weddingOverlay) {
+      lockZoom(false);
       weddingFrame.contentWindow?.WEDDING_SOUND?.suspend(true);
       resumeBgm();
     }
@@ -218,6 +219,12 @@
   /* 온라인 예식장: 처음 들어갈 때 불러온다. */
   const weddingOverlay = $('#weddingOverlay');
   const weddingFrame = $('#weddingFrame');
+  // 아이폰은 글자가 작은 입력 칸(예식장의 이름·방명록 칸)을 누르면 화면을 확대한 채로 둔다.
+  // 예식장 창이 열려 있는 동안만 화면 확대를 막는다. 청첩장의 사진 등은 그대로 확대할 수 있다
+  const viewport = $('meta[name="viewport"]');
+  const viewportContent = viewport.content;
+  const isIPhone = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const lockZoom = locked => { if (isIPhone) viewport.content = locked ? `${viewportContent}, maximum-scale=1` : viewportContent; };
   $$('[data-open-wedding]').forEach(trigger => {
     trigger.addEventListener('click', () => {
       if (!weddingFrame.getAttribute('src')) weddingFrame.src = weddingFrame.dataset.src;
@@ -225,6 +232,7 @@
       shutter.pause();
       bgm.pause();
       weddingFrame.contentWindow?.WEDDING_SOUND?.suspend(false);
+      lockZoom(true);
       openLayer(weddingOverlay);
     });
   });

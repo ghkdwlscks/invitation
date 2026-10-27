@@ -940,6 +940,11 @@
     window.HONEYMOON_GAME.open(guest);
   });
 
+  // 아이폰은 글자가 작은 입력 칸을 누르면 화면을 확대한 채로 둔다. 예식장 주소로 바로 열었을 때도 화면 확대를 막는다
+  // (청첩장 안에서 열면 청첩장 화면의 확대를 main.js가 막는다. 예식장은 두 손가락 확대를 따로 쓴다)
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    $('meta[name="viewport"]').content += ', maximum-scale=1';
+  }
   setupCustomizer();
   $('#groom-character').innerHTML = MINIMI.render({skin: 'warm'}, 'groom');
   $('#bride-character').innerHTML = MINIMI.render({skin: 'light'}, 'bride');

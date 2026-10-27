@@ -322,8 +322,10 @@
       if (item?.seat && item.at) seatedAt.set(item.seat, Number(item.at));
       if (!item || !item.seat || item.seat === guest?.seat) continue;
       const current = occupied.get(item.seat);
-      if (current && current.name === item.name && current.message === item.message) continue;
-      occupied.set(item.seat, {name: String(item.name), message: String(item.message), avatar: MINIMI.normalize(item.avatar)});
+      const avatar = MINIMI.normalize(item.avatar);
+      // 다른 하객이 옷을 갈아입은 것도 바뀐 것으로 본다. 시트가 숫자로 바꾼 이름(예: 1004)도 글자로 맞춰 비교한다
+      if (current && current.name === String(item.name) && current.message === String(item.message) && JSON.stringify(current.avatar) === JSON.stringify(avatar)) continue;
+      occupied.set(item.seat, {name: String(item.name), message: String(item.message), avatar});
       changed.push(item.seat);
     }
     changed.forEach(id => {

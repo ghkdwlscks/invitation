@@ -878,6 +878,11 @@
     else location.href = '../';
   });
   $('#guestbook-tab').addEventListener('click', () => guestbookBoard.scrollIntoView({behavior: 'smooth', block: 'start'}));
+  // 머리글 제목은 맨 위로 올리기만 한다. 주소에 #top이 붙으면 뒤로가기 기록이 하나 늘어 '청첩장으로'를 두 번 눌러야 나가진다
+  $('.wordmark').addEventListener('click', event => {
+    event.preventDefault();
+    $('#top').scrollIntoView({behavior: 'smooth', block: 'start'});
+  });
   prizeForm.addEventListener('submit', async event => {
     event.preventDefault();
     const submit = $('#prize-submit');

@@ -45,10 +45,12 @@
   }
 
   function refresh() {
+    // 휴대폰 화면을 끄거나 다른 앱으로 가 있는 동안에도 멈춰 둔다(돌아오면 이어서 나온다)
+    const quiet = muted || suspended || document.hidden;
     for (const [name, audio] of Object.entries(players)) {
-      if (name !== current || muted || suspended) audio.pause();
+      if (name !== current || quiet) audio.pause();
     }
-    if (current && !muted && !suspended) {
+    if (current && !quiet) {
       // 브라우저가 막으면 다음 터치 때 다시 시도한다(휴대폰 터치는 손을 뗄 때 소리가 허락된다)
       player(current).play().catch(() => {
         for (const type of ['pointerup', 'touchend', 'keydown']) document.addEventListener(type, refresh, {once: true});
@@ -59,6 +61,8 @@
       button.setAttribute('aria-label', muted ? '배경음악 켜기' : '배경음악 끄기');
     });
   }
+
+  document.addEventListener('visibilitychange', refresh);
 
   window.WEDDING_SOUND = {
     play(name) {

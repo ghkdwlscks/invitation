@@ -11,17 +11,26 @@
   const isRealName = name => !TEST_NAME.test(String(name || ''));
 
   /* ---------- 실제 서버 ---------- */
+  // 연결이 멈춰도 '당첨 확인 중…'이 끝없이 떠 있지 않게, 이만큼 기다려도 답이 없으면 실패로 보고 다시 누르게 한다
+  const TIMEOUT = 20000;
   async function call(action, payload = {}) {
-    const response = await fetch(ENDPOINT, {
-      method: 'POST',
-      // text/plain이면 브라우저가 사전 확인 요청을 보내지 않아 Apps Script와 바로 통한다
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({action, ...payload})
-    });
-    if (!response.ok) throw new Error(`서버 응답 ${response.status}`);
-    const data = await response.json();
-    if (data.error) throw new Error(data.error);
-    return data;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT);
+    try {
+      const response = await fetch(ENDPOINT, {
+        method: 'POST',
+        // text/plain이면 브라우저가 사전 확인 요청을 보내지 않아 Apps Script와 바로 통한다
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({action, ...payload}),
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error(`서버 응답 ${response.status}`);
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      return data;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   const server = {

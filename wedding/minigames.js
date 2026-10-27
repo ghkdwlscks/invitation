@@ -563,7 +563,8 @@
     runs[mode].push(run);
     runs[mode] = runs[mode].slice(-30);
     saveRuns();
-    showResult(reason);
+    // 창을 닫아서 끝난 판은 결과 사진을 띄우지 않고 기록만 남긴다(닫힌 창 위에 결과가 뒤로가기 기록으로 남지 않게)
+    if (dialog.open) showResult(reason);
     actionButton.textContent = '다시 도전하기 ↻';
     refreshScore();
     recordRun(mode, run);
